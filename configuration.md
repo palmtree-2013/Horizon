@@ -49,6 +49,20 @@ Configure which AI model scores and summarizes your content.
 
 Available models: `MiniMax-M2.5`, `MiniMax-M2.5-highspeed`
 
+**Aliyun DashScope** (OpenAI-compatible):
+
+```json
+{
+  "ai": {
+    "provider": "ali",
+    "model": "qwen-plus",
+    "api_key_env": "DASHSCOPE_API_KEY"
+  }
+}
+```
+
+Use the [DashScope compatible-mode](https://help.aliyun.com/zh/dashscope/developer-reference/use-dashscope-by-calling-openai-api) endpoint. Set `DASHSCOPE_API_KEY` in your `.env`. Optional: set `base_url` to override the default `https://dashscope.aliyuncs.com/compatible-mode/v1`.
+
 **Custom Base URL** (for proxies):
 
 ```json

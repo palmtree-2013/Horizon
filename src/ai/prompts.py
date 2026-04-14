@@ -6,7 +6,13 @@ Rules:
 - Group items when they describe the same developing story, policy track, negotiation, escalation cycle, corporate case, or tightly connected set of developments
 - Use titles, tags, and summaries together; overlapping tags are strong evidence when the underlying topic is clearly shared
 - It is acceptable to group follow-up coverage from different outlets if a reader would expect them in one digest item
+- Group outcome + consequence coverage together when they stem from the same core event
+- Group decision + reaction coverage together when the reaction is directly about that same decision
+- Group negotiation + obstacle/boycott/response coverage together when they refer to the same talks
+- Group election result + regional impact + likely next-policy-direction coverage together when they are all about the same election outcome
+- Group strike/ceasefire/talks follow-ups together only when they concern the same concrete diplomatic or military episode
 - Do NOT group items that merely share a country, conflict, or broad theme but discuss meaningfully different developments
+- Do NOT group items that only share "Ukraine", "China", "Iran", "EU", or another broad actor if the specific event, decision, or policy track is different
 - Err on the side of keeping items separate when unsure"""
 
 TOPIC_DEDUP_USER = """The following news items have already been sorted by importance score (descending). Identify which items should be grouped into the same topic cluster.
@@ -14,6 +20,16 @@ TOPIC_DEDUP_USER = """The following news items have already been sorted by impor
 {items}
 
 Return a JSON object listing only the groups that contain 2+ related items. Each group is a list of indices; the first index in each group is the primary item to keep as the cluster representative.
+
+Examples of items that SHOULD usually be grouped:
+- election result + analysis of what the result means + likely stance of the incoming government
+- announcement of talks + article on boycott/obstacles/conditions affecting those same talks
+- sanctions decision + market/policy reaction to that same sanctions decision
+
+Examples of items that should usually stay separate:
+- two different policy moves by the same country on the same day
+- two different fronts of the same war without the same concrete event
+- broad thematic analysis and a separate breaking-news event that only share geography
 
 Respond with valid JSON only:
 {{

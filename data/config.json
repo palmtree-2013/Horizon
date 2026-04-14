@@ -2,7 +2,7 @@
   "version": "1.0",
   "ai": {
     "provider": "openai",
-    "model": "google/gemma-4-31b-it",
+    "model": "openrouter/elephant-alpha",
     "base_url": "https://openrouter.ai/api/v1",
     "api_key_env": "OPENROUTER_API_KEY",
     "languages": ["zh", "en"]
@@ -32,10 +32,16 @@
         "url": "https://feeds.bbci.co.uk/news/world/rss.xml",
         "enabled": true,
         "category": "world-news"
+      },
+      {
+        "name": "RFI International",
+        "url": "https://www.rfi.fr/en/international/rss",
+        "enabled": true,
+        "category": "world-news"
       }
     ],
     "reddit": {
-      "enabled": true,
+      "enabled": false,
       "subreddits": [
         {
           "subreddit": "geopolitics",

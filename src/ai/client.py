@@ -133,16 +133,31 @@ class OpenAIClient(AIClient):
         Returns:
             str: Generated text
         """
-        response = await self.client.chat.completions.create(
-            model=self.model,
-            messages=[
+        request_kwargs = {
+            "model": self.model,
+            "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": user}
             ],
-            temperature=temperature,
-            max_tokens=max_tokens,
-            response_format={"type": "json_object"}
-        )
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "response_format": {"type": "json_object"},
+        }
+
+        try:
+            response = await self.client.chat.completions.create(**request_kwargs)
+        except Exception as exc:
+            message = str(exc).lower()
+            if (
+                "response_format" not in message
+                and "json_object" not in message
+                and "json mode" not in message
+            ):
+                raise
+
+            request_kwargs.pop("response_format", None)
+            response = await self.client.chat.completions.create(**request_kwargs)
+
         usage = getattr(response, "usage", None)
         if usage is not None:
             record_usage(
@@ -307,16 +322,51 @@ class GeminiClient(AIClient):
         Returns:
             str: Generated text
         """
-        response = await self.client.aio.models.generate_content(
-            model=self.model,
-            contents=user,
-            config=types.GenerateContentConfig(
-                system_instruction=system,
-                temperature=temperature,
-                max_output_tokens=max_tokens,
-                response_mime_type="application/json"
+        supports_system_instruction = True
+        supports_json_mode = True
+
+        def build_request() -> tuple[str, types.GenerateContentConfig]:
+            contents = user if supports_system_instruction else (
+                f"System instructions:\n{system}\n\n"
+                f"User request:\n{user}"
             )
-        )
+
+            config_kwargs = {
+                "temperature": temperature,
+                "max_output_tokens": max_tokens,
+            }
+            if supports_system_instruction:
+                config_kwargs["system_instruction"] = system
+            if supports_json_mode:
+                config_kwargs["response_mime_type"] = "application/json"
+
+            return contents, types.GenerateContentConfig(**config_kwargs)
+
+        last_exc = None
+        for _ in range(3):
+            contents, request_config = build_request()
+            try:
+                response = await self.client.aio.models.generate_content(
+                    model=self.model,
+                    contents=contents,
+                    config=request_config
+                )
+                break
+            except Exception as exc:
+                last_exc = exc
+                message = str(exc)
+                changed = False
+                if supports_system_instruction and "Developer instruction is not enabled" in message:
+                    supports_system_instruction = False
+                    changed = True
+                if supports_json_mode and "JSON mode is not enabled" in message:
+                    supports_json_mode = False
+                    changed = True
+                if not changed:
+                    raise
+        else:
+            raise last_exc
+
         usage = getattr(response, "usage_metadata", None)
         if usage is not None:
             total = getattr(usage, "total_token_count", 0) or 0

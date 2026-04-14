@@ -163,9 +163,19 @@ class DailySummarizer:
             lines.append("")
             lines.append(f"**{labels['background']}**: {background}")
 
+        cluster_references = meta.get("cluster_references") or []
         sources = meta.get("sources") or []
-        if sources:
-            items_html = "".join(f'<li><a href="{s["url"]}">{s["title"]}</a></li>\n' for s in sources)
+        references = []
+        seen_urls = set()
+        for source in [*cluster_references, *sources]:
+            url = str(source.get("url", "")).strip()
+            title = str(source.get("title", "")).strip()
+            if not url or url in seen_urls:
+                continue
+            references.append({"url": url, "title": title or url})
+            seen_urls.add(url)
+        if references:
+            items_html = "".join(f'<li><a href="{s["url"]}">{s["title"]}</a></li>\n' for s in references)
             lines += [
                 "",
                 f'<details><summary>{labels["references"]}</summary>\n<ul>\n{items_html}\n</ul>\n</details>',

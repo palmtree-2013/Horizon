@@ -1,8 +1,8 @@
 name: Daily Horizon Summary
 
 on:
-  # schedule:
-  #   - cron: '0 0 */2 * *'  # Runs every 2 days at 00:00 UTC
+  schedule:
+    - cron: '0 7 * * *'  # Daily at 07:00 UTC (09:00 Europe/Berlin during DST)
   workflow_dispatch:      # Allow manual trigger
 
 jobs:

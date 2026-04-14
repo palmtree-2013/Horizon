@@ -1,17 +1,19 @@
 """AI prompts for content analysis and summarization."""
 
-TOPIC_DEDUP_SYSTEM = """You are a news deduplication assistant. Identify groups of news items that cover the exact same real-world event, release, or announcement.
+TOPIC_DEDUP_SYSTEM = """You are a news topic-grouping assistant. Identify groups of news items that belong to the same closely related topic cluster.
 
 Rules:
-- Group items ONLY if they report on the identical event (same product release, same incident, same announcement)
-- Items about the same country or conflict but different events are NOT duplicates ("ceasefire announced" vs "ceasefire violated")
+- Group items when they describe the same developing story, policy track, negotiation, escalation cycle, corporate case, or tightly connected set of developments
+- Use titles, tags, and summaries together; overlapping tags are strong evidence when the underlying topic is clearly shared
+- It is acceptable to group follow-up coverage from different outlets if a reader would expect them in one digest item
+- Do NOT group items that merely share a country, conflict, or broad theme but discuss meaningfully different developments
 - Err on the side of keeping items separate when unsure"""
 
-TOPIC_DEDUP_USER = """The following news items have already been sorted by importance score (descending). Identify which items are duplicates of each other.
+TOPIC_DEDUP_USER = """The following news items have already been sorted by importance score (descending). Identify which items should be grouped into the same topic cluster.
 
 {items}
 
-Return a JSON object listing only the groups that contain duplicates (2+ items). Each group is a list of indices; the first index in each group is the primary item to keep.
+Return a JSON object listing only the groups that contain 2+ related items. Each group is a list of indices; the first index in each group is the primary item to keep as the cluster representative.
 
 Respond with valid JSON only:
 {{
@@ -169,6 +171,9 @@ CONTENT_ENRICHMENT_USER = """Provide a structured bilingual analysis for the fol
 
 **Web Search Results (for grounding):**
 {web_context}
+
+**Background setting:**
+{background_instruction}
 
 Respond with valid JSON only. Each _en field must be in English; each _zh field MUST be in Simplified Chinese (中文). Every field MUST be at least one complete sentence (except community_discussion fields when no comments exist):
 {{

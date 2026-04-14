@@ -3,7 +3,7 @@
 import asyncio
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from typing import List, Dict
+from typing import List, Dict, Any
 from urllib.parse import urlparse
 import httpx
 from rich.console import Console
@@ -38,11 +38,12 @@ class HorizonOrchestrator:
         self.console = Console()
         self.email_manager = EmailManager(config.email, console=self.console) if config.email else None
 
-    async def run(self, force_hours: int = None) -> None:
+    async def run(self, force_hours: int = None, include_background: bool = False) -> None:
         """Execute the complete workflow.
 
         Args:
             force_hours: Optional override for time window in hours
+            include_background: Whether enrichment should generate background sections
         """
         self.console.print("[bold cyan]🌅 Horizon - Starting aggregation...[/bold cyan]\n")
 
@@ -107,7 +108,7 @@ class HorizonOrchestrator:
             self.console.print("")
 
             # 6. Search related stories + enrich with background knowledge (2nd AI pass)
-            await self._enrich_important_items(important_items)
+            await self._enrich_important_items(important_items, include_background=include_background)
 
             # 7. Generate and save daily summaries for each configured language
             today = datetime.utcnow().strftime("%Y-%m-%d")
@@ -335,6 +336,23 @@ class HorizonOrchestrator:
 
         return merged
 
+    @staticmethod
+    def _merge_reference_lists(*reference_lists: list[dict[str, str]]) -> list[dict[str, str]]:
+        """Merge link references while preserving order and removing duplicates by URL."""
+        merged: list[dict[str, str]] = []
+        seen: set[str] = set()
+
+        for refs in reference_lists:
+            for ref in refs or []:
+                url = str(ref.get("url", "")).strip()
+                title = str(ref.get("title", "")).strip()
+                if not url or url in seen:
+                    continue
+                merged.append({"url": url, "title": title or url})
+                seen.add(url)
+
+        return merged
+
     async def merge_topic_duplicates(self, items: List[ContentItem]) -> List[ContentItem]:
         """Merge items covering the same topic using AI semantic deduplication.
 
@@ -343,7 +361,9 @@ class HorizonOrchestrator:
         Sends all item titles, tags, and summaries to AI in a single call.
         Items must already be sorted by ai_score descending so that the first
         item in each duplicate group is always the highest-scored one.
-        Content (comments) from duplicate items is merged into the primary.
+        Content, tags, summaries, and references from grouped items are merged
+        into the primary so downstream enrichment can summarize the topic
+        cluster instead of a single article.
 
         Falls back to returning items unchanged if the AI call fails.
         """
@@ -390,26 +410,74 @@ class HorizonOrchestrator:
             if primary_idx < 0 or primary_idx >= len(items):
                 continue
             primary = items[primary_idx]
+            grouped_titles: list[str] = [primary.title]
+            grouped_summaries: list[str] = [primary.ai_summary] if primary.ai_summary else []
+            grouped_tags: list[str] = list(primary.ai_tags)
+            grouped_sources: list[dict[str, str]] = [
+                {"url": str(primary.url), "title": primary.title}
+            ]
+            cluster_members: list[dict[str, Any]] = [
+                {
+                    "title": primary.title,
+                    "url": str(primary.url),
+                    "source_type": primary.source_type.value,
+                    "published_at": primary.published_at.isoformat(),
+                }
+            ]
             for dup_idx in group[1:]:
                 if not isinstance(dup_idx, int) or dup_idx < 0 or dup_idx >= len(items):
                     continue
                 if dup_idx == primary_idx:
                     continue
                 dup = items[dup_idx]
+                grouped_titles.append(dup.title)
+                if dup.ai_summary and dup.ai_summary not in grouped_summaries:
+                    grouped_summaries.append(dup.ai_summary)
+                for tag in dup.ai_tags:
+                    if tag not in grouped_tags:
+                        grouped_tags.append(tag)
+                grouped_sources.append({"url": str(dup.url), "title": dup.title})
+                cluster_members.append(
+                    {
+                        "title": dup.title,
+                        "url": str(dup.url),
+                        "source_type": dup.source_type.value,
+                        "published_at": dup.published_at.isoformat(),
+                    }
+                )
+                primary.ai_score = max(primary.ai_score or 0.0, dup.ai_score or 0.0)
                 # Merge comments/content from the duplicate into the primary
                 if dup.content:
                     if not primary.content or dup.content not in primary.content:
                         label = dup.source_type.value
                         primary.content = (primary.content or "") + f"\n\n--- From {label} ---\n{dup.content}"
+                for mk, mv in dup.metadata.items():
+                    if mk not in primary.metadata or not primary.metadata[mk]:
+                        primary.metadata[mk] = mv
                 self.console.print(
                     f"   [dim]dedup: keep [{primary_idx}] {primary.title}[/dim]\n"
                     f"   [dim]       drop [{dup_idx}] {dup.title}[/dim]"
                 )
                 drop_indices.add(dup_idx)
 
+            primary.ai_tags = grouped_tags
+            if grouped_summaries:
+                primary.ai_summary = " ".join(grouped_summaries)
+            primary.metadata["cluster_member_count"] = len(cluster_members)
+            primary.metadata["cluster_members"] = cluster_members
+            primary.metadata["cluster_titles"] = grouped_titles
+            primary.metadata["cluster_references"] = self._merge_reference_lists(
+                primary.metadata.get("cluster_references") or [],
+                grouped_sources,
+            )
+            primary.metadata["sources"] = self._merge_reference_lists(
+                primary.metadata.get("sources") or [],
+                primary.metadata["cluster_references"],
+            )
+
         return [item for i, item in enumerate(items) if i not in drop_indices]
 
-    async def _enrich_important_items(self, items: List[ContentItem]) -> None:
+    async def _enrich_important_items(self, items: List[ContentItem], include_background: bool = False) -> None:
         """Enrich items with background knowledge (2nd AI pass).
 
         For each item that passed the score threshold, call AI to generate
@@ -417,13 +485,14 @@ class HorizonOrchestrator:
 
         Args:
             items: Important items to enrich (modified in-place)
+            include_background: Whether enrichment should generate background sections
         """
         if not items:
             return
 
         self.console.print("📚 Enriching with background knowledge...")
         ai_client = create_ai_client(self.config.ai)
-        enricher = ContentEnricher(ai_client)
+        enricher = ContentEnricher(ai_client, include_background=include_background)
         await enricher.enrich_batch(items)
         self.console.print(f"   Enriched {len(items)} items\n")
 

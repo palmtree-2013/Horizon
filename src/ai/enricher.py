@@ -26,8 +26,9 @@ from ..models import ContentItem
 class ContentEnricher:
     """Enriches high-scoring content items with background knowledge."""
 
-    def __init__(self, ai_client: AIClient):
+    def __init__(self, ai_client: AIClient, include_background: bool = False):
         self.client = ai_client
+        self.include_background = include_background
 
     async def enrich_batch(self, items: List[ContentItem]) -> None:
         """Enrich items in-place with background knowledge.
@@ -168,6 +169,11 @@ class ContentEnricher:
             content=content_text,
             comments_section=f"\n**Community Comments:**\n{comments_text}" if comments_text else "",
             web_context=web_context or "No web search results available.",
+            background_instruction=(
+                "Generate the background_en and background_zh fields normally."
+                if self.include_background
+                else "Set background_en and background_zh to empty strings."
+            ),
         )
 
         response = await self.client.complete(
@@ -198,9 +204,11 @@ class ContentEnricher:
             if parts:
                 item.metadata[f"detailed_summary_{lang}"] = " ".join(parts)
 
-            if result.get(f"background_{lang}"):
+            if self.include_background and result.get(f"background_{lang}"):
                 val = result[f"background_{lang}"]
                 item.metadata[f"background_{lang}"] = val.get("text") or str(val) if isinstance(val, dict) else str(val)
+            else:
+                item.metadata.pop(f"background_{lang}", None)
 
             if result.get(f"community_discussion_{lang}"):
                 val = result[f"community_discussion_{lang}"]
@@ -214,9 +222,19 @@ class ContentEnricher:
                 if u in available_urls
             ]
             if valid:
-                item.metadata["sources"] = valid
+                existing = item.metadata.get("sources") or []
+                merged = []
+                seen = set()
+                for source in [*existing, *valid]:
+                    url = str(source.get("url", "")).strip()
+                    title = str(source.get("title", "")).strip()
+                    if not url or url in seen:
+                        continue
+                    merged.append({"url": url, "title": title or url})
+                    seen.add(url)
+                item.metadata["sources"] = merged
 
         # Backward-compatible fallback fields (English as default)
         item.metadata["detailed_summary"] = item.metadata.get("detailed_summary_en", "")
-        item.metadata["background"] = item.metadata.get("background_en", "")
+        item.metadata["background"] = item.metadata.get("background_en", "") if self.include_background else ""
         item.metadata["community_discussion"] = item.metadata.get("community_discussion_en", "")

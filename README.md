@@ -23,7 +23,7 @@
 
 Horizon collects news from multiple customizable sources, uses AI to score and filter them, and generates a daily geopolitical briefing — complete with summaries, community discussions, and background explanations in both English and Chinese.
 
-[📖 Live Demo](https://thysrael.github.io/Horizon/) · [📋 Configuration Guide](https://thysrael.github.io/Horizon/configuration) · [简体中文](README_zh.md)
+[📖 Live Demo](palmtree-2013.github.io/Horizon/ ) · [📋 Configuration Guide](https://thysrael.github.io/Horizon/configuration) · [简体中文](README_zh.md)
 
 </div>
 

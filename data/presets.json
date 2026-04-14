@@ -1,6 +1,49 @@
 {
   "domains": [
     {
+      "id": "geopolitics",
+      "name": "Geopolitics / Foreign Policy",
+      "name_zh": "地缘政治 / 外交政策",
+      "keywords": ["geopolitics", "foreign policy", "international relations", "diplomacy", "defense", "security", "sanctions", "nato", "europe", "middle east", "indo-pacific", "china", "russia", "ukraine", "taiwan", "南海", "乌克兰", "中东", "外交", "制裁", "北约", "国际关系", "地缘政治"],
+      "sources": [
+        {
+          "type": "reddit_subreddit",
+          "description": "Geopolitics discussions and link analysis",
+          "description_zh": "地缘政治讨论与链接分析",
+          "tags": ["geopolitics", "analysis"],
+          "config": { "subreddit": "geopolitics", "sort": "hot", "fetch_limit": 20, "min_score": 20 }
+        },
+        {
+          "type": "reddit_subreddit",
+          "description": "Defense and military posture discussion with higher signal than general news",
+          "description_zh": "相较泛新闻更高信噪比的防务与军事态势讨论",
+          "tags": ["defense", "security"],
+          "config": { "subreddit": "CredibleDefense", "sort": "hot", "fetch_limit": 15, "min_score": 40 }
+        },
+        {
+          "type": "rss",
+          "description": "Reuters World — fast-moving international developments",
+          "description_zh": "Reuters World — 国际局势快速动态",
+          "tags": ["breaking", "world"],
+          "config": { "name": "Reuters World", "url": "https://feeds.reuters.com/Reuters/worldNews", "category": "breaking-news" }
+        },
+        {
+          "type": "rss",
+          "description": "The Diplomat — Asia-Pacific geopolitics and regional security analysis",
+          "description_zh": "The Diplomat — 亚太地缘政治与区域安全分析",
+          "tags": ["asia", "security"],
+          "config": { "name": "The Diplomat", "url": "https://thediplomat.com/feed/", "category": "asia-pacific" }
+        },
+        {
+          "type": "rss",
+          "description": "Geopolitical Monitor — geopolitical risk and strategic analysis",
+          "description_zh": "Geopolitical Monitor — 地缘风险与战略分析",
+          "tags": ["risk", "analysis"],
+          "config": { "name": "Geopolitical Monitor", "url": "https://www.geopoliticalmonitor.com/feed/", "category": "analysis" }
+        }
+      ]
+    },
+    {
       "id": "ai-ml",
       "name": "AI / Machine Learning",
       "name_zh": "人工智能 / 机器学习",

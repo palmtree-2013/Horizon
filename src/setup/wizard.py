@@ -36,7 +36,7 @@ def print_banner():
  | |  | | (_) | |  | |/ / | (_) | | | |
  |_|  |_|\___/|_|  |_/___| \___/|_| |_|
 [/bold blue]
-[cyan]  Setup Wizard — Configure your information sources[/cyan]
+[cyan]  Setup Wizard — Configure your news briefing sources[/cyan]
     """
     console.print(banner)
 
@@ -113,8 +113,8 @@ def get_interests() -> str:
     console.print(
         "Describe what topics you'd like to follow. "
         "You can use Chinese, English, or both.\n"
-        "[dim]Examples: \"LLM inference\", \"具身智能\", \"Rust systems programming\", "
-        "\"web security\", \"开源工具\"[/dim]\n"
+        "[dim]Examples: \"Middle East diplomacy\", \"俄乌局势\", \"Indo-Pacific security\", "
+        "\"sanctions policy\", \"全球能源通道\"[/dim]\n"
     )
     interests = Prompt.ask("Your interests")
     return interests

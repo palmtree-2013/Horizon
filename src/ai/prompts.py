@@ -4,7 +4,7 @@ TOPIC_DEDUP_SYSTEM = """You are a news deduplication assistant. Identify groups 
 
 Rules:
 - Group items ONLY if they report on the identical event (same product release, same incident, same announcement)
-- Items about the same product but different events are NOT duplicates ("Gemma 4 released" vs "Gemma 4 jailbroken")
+- Items about the same country or conflict but different events are NOT duplicates ("ceasefire announced" vs "ceasefire violated")
 - Err on the side of keeping items separate when unsure"""
 
 TOPIC_DEDUP_USER = """The following news items have already been sorted by importance score (descending). Identify which items are duplicates of each other.
@@ -20,42 +20,44 @@ Respond with valid JSON only:
 
 If there are no duplicates at all, return: {{"duplicates": []}}"""
 
-CONTENT_ANALYSIS_SYSTEM = """You are an expert content curator helping filter important technical and academic information.
+CONTENT_ANALYSIS_SYSTEM = """You are an expert geopolitical editor helping filter important international affairs reporting and analysis.
 
 Score content on a 0-10 scale based on importance and relevance:
 
-**9-10: Groundbreaking** - Major breakthroughs, paradigm shifts, or highly significant announcements
-- New major version releases of widely-used technologies
-- Significant research breakthroughs
-- Important industry-changing announcements
+**9-10: Critical** - Major geopolitical developments with immediate strategic or global significance
+- Major military escalation or de-escalation
+- High-impact diplomatic breakthroughs or breakdowns
+- Sanctions, treaty, alliance, or policy moves with broad international consequences
+- Leadership changes or state actions likely to reshape regional security
 
 **7-8: High Value** - Important developments worth immediate attention
-- Interesting technical deep-dives
-- Novel approaches to known problems
-- Insightful analysis or commentary
-- Valuable tools or libraries
+- Important negotiations, force posture changes, sanctions developments, elections, or policy decisions
+- High-quality regional analysis with strong sourcing
+- Meaningful developments in security, trade, energy, or diplomacy
 
 **5-6: Interesting** - Worth knowing but not urgent
-- Incremental improvements
-- Useful tutorials
-- Moderate community interest
+- Useful background analysis, follow-up reporting, or secondary developments
+- Regionally important stories with limited wider spillover
+- Moderate community or analyst interest
 
 **3-4: Low Priority** - Generic or routine content
-- Minor updates
-- Common knowledge
-- Overly promotional content
+- Repetitive coverage without new information
+- Thin commentary or low-substance aggregation
+- Minor updates with limited strategic importance
 
 **0-2: Noise** - Not relevant or low quality
-- Spam or purely promotional
+- Rumor, propaganda, or weakly sourced claims
 - Off-topic content
-- Trivial updates
+- Trivial updates with no analytical value
 
 Consider:
-- Technical depth and novelty
-- Potential impact on the field
+- Strategic significance
+- Potential regional or global spillover
+- Policy, diplomatic, economic, or military impact
+- Credibility and seriousness of the sourcing
 - Quality of writing/presentation
-- Relevance to software engineering, AI/ML, and systems research
-- Community discussion quality: insightful comments, diverse viewpoints, and debates increase value
+- Relevance to geopolitics, foreign policy, international security, and statecraft
+- Community discussion quality: substantive comments, competing interpretations, and factual corrections increase value
 - Engagement signals: high upvotes/favorites with substantive discussion indicate community-validated importance
 """
 
@@ -81,10 +83,10 @@ Respond with valid JSON only:
   "tags": ["<tag1>", "<tag2>", ...]
 }}"""
 
-CONCEPT_EXTRACTION_SYSTEM = """You identify technical concepts in news that a reader might not know.
+CONCEPT_EXTRACTION_SYSTEM = """You identify geopolitical concepts in news that a reader might not know.
 Given a news item, return 1-3 search queries for concepts that need explanation.
-Focus on: specific technologies, protocols, algorithms, tools, or projects that are not widely known.
-Do NOT return queries for well-known things (e.g. "Python", "Linux", "Google").
+Focus on: treaties, organizations, armed groups, sanctions regimes, disputed regions, military systems, legal frameworks, and policy terms that are not widely known.
+Do NOT return queries for extremely well-known entities unless the story depends on a specific mechanism or doctrine.
 If the news is self-explanatory, return an empty list."""
 
 CONCEPT_EXTRACTION_USER = """What concepts in this news might need explanation?
@@ -99,7 +101,7 @@ Respond with valid JSON only:
   "queries": ["<search query 1>", "<search query 2>"]
 }}"""
 
-CONTENT_ENRICHMENT_SYSTEM = """You are a knowledgeable technical writer who helps readers understand important news in context.
+CONTENT_ENRICHMENT_SYSTEM = """You are a knowledgeable geopolitical analyst who helps readers understand important news in context.
 
 Given a high-scoring news item, its content, and web search results about the topic, your job is to produce a structured analysis.
 
@@ -114,25 +116,25 @@ Provide EACH text field in BOTH English and Chinese. Use the following key namin
 Field definitions:
 0. **title** (one short phrase, ≤15 words): A clear, accurate headline for the news item.
 
-1. **whats_new** (1-2 complete sentences): What exactly happened, what changed, what breakthrough was made. Be specific — mention names, versions, numbers, dates when available.
+1. **whats_new** (1-2 complete sentences): What exactly happened, what changed, or what was announced. Be specific — mention actors, regions, organizations, numbers, and dates when available.
 
-2. **why_it_matters** (1-2 complete sentences): Why this is significant, what impact it could have, who will be affected. Connect to the broader ecosystem or industry trends.
+2. **why_it_matters** (1-2 complete sentences): Why this is significant, what strategic, diplomatic, economic, or military impact it could have, and who will be affected. Connect to broader regional or global trends.
 
-3. **key_details** (1-2 complete sentences): Notable technical details, limitations, caveats, or additional context worth knowing. Include specifics that a technically-minded reader would find valuable.
+3. **key_details** (1-2 complete sentences): Notable details, limitations, caveats, chronology, or additional context worth knowing. Include specifics that a reader tracking foreign affairs would find valuable.
 
-4. **background** (2-4 sentences): Brief background knowledge that helps a reader without deep domain expertise understand the news. Explain key concepts, technologies, or context that the news assumes the reader already knows.
+4. **background** (2-4 sentences): Brief background knowledge that helps a reader without deep domain expertise understand the news. Explain key actors, treaties, institutions, conflicts, or policy context that the news assumes the reader already knows.
 
 5. **community_discussion** (1-3 sentences): If community comments are provided, summarize the overall sentiment and key viewpoints from the discussion — agreements, disagreements, concerns, additional insights, or notable counterarguments. If no comments are provided, return an empty string.
 
 **CRITICAL — Language rules (MUST follow):**
 - All *_en fields MUST be written in English.
-- All *_zh fields MUST be written in Simplified Chinese (简体中文). 绝对不能用英文写 _zh 字段的内容。Only keep technical abbreviations, acronyms, and widely-used proper nouns (e.g. "GPT-4", "CUDA", "Rust") in their original English form; everything else must be Chinese.
+- All *_zh fields MUST be written in Simplified Chinese (简体中文). 绝对不能用英文写 _zh 字段的内容。Only keep acronyms and widely-used proper nouns (e.g. "NATO", "G7", "Black Sea") in their original English form; everything else must be Chinese.
 
 Guidelines:
 - EVERY field (except community_discussion when no comments exist) must contain at least one complete sentence — no field may be empty or contain just a phrase
 - Base your explanation on the provided content and web search results — do NOT fabricate information
 - ONLY explain concepts and terms that are explicitly mentioned in the title, summary, or content
-- Use the web search results to ensure accuracy, especially for recent projects, tools, or events
+- Use the web search results to ensure accuracy, especially for recent events, institutions, or policy actions
 - If the news is self-explanatory and needs no background, return an empty string for both background fields
 - For **sources**: pick 1-3 URLs from the Web Search Results that you actually relied on for the background fields. Only use URLs that appear verbatim in the search results above — do not invent or modify URLs.
 """

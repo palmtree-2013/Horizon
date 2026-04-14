@@ -2,7 +2,7 @@
 
 # 🌅 Horizon
 
-**AI curates the tech news. You just read.**
+**AI curates the geopolitical news. You just read.**
 
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg?style=flat-square&logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
@@ -21,7 +21,7 @@
 ![MiniMax](https://img.shields.io/badge/MiniMax-FF6F00?style=flat-square)
 ![OpenClaw](https://img.shields.io/badge/OpenClaw-C83232?style=flat-square)
 
-Horizon collects news from multiple customizable sources, uses AI to score and filter them, and generates a daily briefing — complete with summaries, community discussions, and background explanations in both English and Chinese.
+Horizon collects news from multiple customizable sources, uses AI to score and filter them, and generates a daily geopolitical briefing — complete with summaries, community discussions, and background explanations in both English and Chinese.
 
 [📖 Live Demo](https://thysrael.github.io/Horizon/) · [📋 Configuration Guide](https://thysrael.github.io/Horizon/configuration) · [简体中文](README_zh.md)
 
@@ -79,7 +79,7 @@ Horizon collects news from multiple customizable sources, uses AI to score and f
 
 1. **Fetch** — Pull latest content from all configured sources concurrently
 2. **Deduplicate** — Merge items pointing to the same URL across different platforms
-3. **Score** — AI rates each item 0-10 based on technical depth, novelty, and impact
+3. **Score** — AI rates each item 0-10 based on geopolitical significance, credibility, and impact
 4. **Filter** — Keep only items above your configured threshold (default: 6.0)
 5. **Enrich** — For high-scoring items, search the web for background context and collect community discussions
 6. **Summarize** — Generate a structured Markdown report with summaries, tags, and references
@@ -128,7 +128,7 @@ docker-compose run --rm horizon --hours 48
 uv run horizon-wizard
 ```
 
-The wizard asks about your interests (e.g. "LLM inference", "嵌入式", "web security") and auto-generates `data/config.json` from a [curated preset library](https://thysrael.github.io/Horizon/presets) + optional AI recommendations.
+The wizard asks about your interests (e.g. "Middle East diplomacy", "俄乌局势", "Indo-Pacific security") and auto-generates `data/config.json` from a [curated preset library](https://thysrael.github.io/Horizon/presets) + optional AI recommendations.
 
 **Option B: Manual configuration**
 
@@ -148,16 +148,14 @@ Here's what a config looks like:
     "languages": ["en", "zh"]   // bilingual output
   },
   "sources": {
-    "hackernews": { "enabled": true, "fetch_top_stories": 20, "min_score": 100 },
+    "hackernews": { "enabled": false, "fetch_top_stories": 20, "min_score": 100 },
     "rss": [
-      { "name": "Simon Willison", "url": "https://simonwillison.net/atom/everything/" }
+      { "name": "Reuters World", "url": "https://feeds.reuters.com/Reuters/worldNews" },
+      { "name": "The Diplomat", "url": "https://thediplomat.com/feed/" }
     ],
     "reddit": {
-      "subreddits": [{ "subreddit": "MachineLearning", "sort": "hot" }],
+      "subreddits": [{ "subreddit": "geopolitics", "sort": "hot" }],
       "fetch_comments": 5
-    },
-    "telegram": {
-      "channels": [{ "channel": "zaihuapd", "fetch_limit": 20 }]
     }
   },
   "filtering": {

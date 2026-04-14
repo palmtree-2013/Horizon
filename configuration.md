@@ -7,6 +7,12 @@ title: Configuration Guide
 
 Horizon is configured through two files: a `.env` file for API keys and a `data/config.json` file for sources, AI provider, and filtering options.
 
+## API Requirements
+
+- **Required**: one AI provider key referenced by `ai.api_key_env` in `config.json`. This key is used for scoring, filtering, summarization, and enrichment.
+- **Optional**: `GITHUB_TOKEN` if you enable GitHub sources and want higher GitHub API rate limits.
+- **Not required in the current implementation**: Reddit API credentials, Telegram bot tokens, or a separate web-search API key.
+
 ## AI Providers
 
 Configure which AI model scores and summarizes your content.
@@ -86,14 +92,9 @@ All sources are configured under the top-level `sources` key in `config.json`.
   "sources": {
     "github": [
       {
-        "type": "user_events",
-        "username": "gvanrossum",
-        "enabled": true
-      },
-      {
         "type": "repo_releases",
-        "owner": "python",
-        "repo": "cpython",
+        "owner": "globaldothealth",
+        "repo": "outbreak-info",
         "enabled": true
       }
     ]
@@ -122,10 +123,10 @@ All sources are configured under the top-level `sources` key in `config.json`.
   "sources": {
     "rss": [
       {
-        "name": "Blog Name",
-        "url": "https://example.com/feed.xml",
+        "name": "Reuters World",
+        "url": "https://feeds.reuters.com/Reuters/worldNews",
         "enabled": true,
-        "category": "ai-ml"
+        "category": "breaking-news"
       }
     ]
   }
@@ -142,19 +143,13 @@ All sources are configured under the top-level `sources` key in `config.json`.
       "fetch_comments": 5,
       "subreddits": [
         {
-          "subreddit": "MachineLearning",
+          "subreddit": "geopolitics",
           "sort": "hot",
           "fetch_limit": 25,
           "min_score": 10
         }
       ],
-      "users": [
-        {
-          "username": "spez",
-          "sort": "new",
-          "fetch_limit": 10
-        }
-      ]
+      "users": []
     }
   }
 }
@@ -164,11 +159,11 @@ All sources are configured under the top-level `sources` key in `config.json`.
 
 Content is scored 0-10:
 
-- **9-10**: Groundbreaking - Major breakthroughs, paradigm shifts
-- **7-8**: High Value - Important developments, deep technical content
-- **5-6**: Interesting - Worth knowing but not urgent
-- **3-4**: Low Priority - Generic or routine content
-- **0-2**: Noise - Spam, off-topic, or trivial
+- **9-10**: Critical - Major geopolitical developments with immediate strategic significance
+- **7-8**: High Value - Important diplomatic, military, sanctions, or policy developments
+- **5-6**: Interesting - Useful context, follow-up reporting, or regional analysis
+- **3-4**: Low Priority - Generic or repetitive coverage without major implications
+- **0-2**: Noise - Weakly sourced, off-topic, or trivial content
 
 ```json
 {

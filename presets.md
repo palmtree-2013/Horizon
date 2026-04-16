@@ -9,115 +9,80 @@ title: Source Presets
 
 ## 预设信息源库
 
-Horizon 内置了一套精心整理的信息源预设库，覆盖多个技术领域。运行 `horizon-wizard` 向导时，系统会根据你的兴趣自动匹配合适的源。
+Horizon 内置了一套围绕地缘经济、外交政策与国际事务的预设信息源库。运行 `horizon-wizard` 时，系统会根据你的兴趣关键词自动匹配这些领域，并推荐以专业新闻机构和资深记者为主的 RSS 源。
 
-你也可以直接浏览下方列表，手动将感兴趣的源添加到 `data/config.json`。
-
----
-
-### 🤖 人工智能 / 机器学习
-
-| 类型 | 信息源 | 说明 |
-|------|--------|------|
-| Reddit | r/MachineLearning | 机器学习研究讨论 |
-| Reddit | r/LocalLLaMA | 本地大模型社区 — 模型发布、评测、部署技巧 |
-| RSS | Simon Willison | LLM 工具与实验 |
-| GitHub | @karpathy | AI 教育者与研究者 |
-| GitHub | vllm-project/vllm | 高吞吐量大模型推理引擎 |
-| RSS | 量子位 | AI 资讯与前沿报道（微信公众号） |
-| RSS | 新智元 | AI 资讯、模型发布与行业洞察（微信公众号） |
-
-### 🖥️ 系统 / 基础设施
-
-| 类型 | 信息源 | 说明 |
-|------|--------|------|
-| RSS | LWN.net | Linux 与内核新闻 |
-| Reddit | r/linux | Linux 社区讨论 |
-| RSS | Brendan Gregg | 性能与系统 |
-| GitHub | @torvalds | Linux 之父 |
-
-### 🔒 安全 / 隐私
-
-| 类型 | 信息源 | 说明 |
-|------|--------|------|
-| Reddit | r/netsec | 信息安全社区 |
-| RSS | Krebs on Security | 安全调查报道 |
-| RSS | Schneier on Security | 安全分析与评论 |
-
-### 🌐 Web 开发
-
-| 类型 | 信息源 | 说明 |
-|------|--------|------|
-| Reddit | r/webdev | Web 开发社区 |
-| Reddit | r/javascript | JavaScript 讨论与新闻 |
-| RSS | CSS-Tricks | 前端技巧与技术 |
-
-### 🔤 编程语言 / 编译器
-
-| 类型 | 信息源 | 说明 |
-|------|--------|------|
-| Reddit | r/ProgrammingLanguages | 编程语言设计与理论 |
-| Reddit | r/rust | Rust 编程社区 |
-| GitHub | rust-lang/rust | Rust 语言版本发布 |
-| GitHub | ziglang/zig | Zig 语言版本发布 |
-
-### 🤖 嵌入式 / 机器人 / 硬件
-
-| 类型 | 信息源 | 说明 |
-|------|--------|------|
-| Reddit | r/robotics | 机器人研究与项目 |
-| Reddit | r/embedded | 嵌入式系统开发 |
-| RSS | Hackaday | 硬件创客与项目 |
-
-### 🛠️ 开源 / 开发工具
-
-| 类型 | 信息源 | 说明 |
-|------|--------|------|
-| RSS | GitHub Trending | 每日热门仓库 |
-| Reddit | r/commandline | 命令行工具与技巧 |
-| GitHub | neovim/neovim | Neovim 编辑器版本发布 |
-
-### 🔬 科学 / 学术研究
-
-| 类型 | 信息源 | 说明 |
-|------|--------|------|
-| Reddit | r/science | 科学新闻与讨论 |
-| RSS | Nature | 最新研究亮点 |
-| RSS | Quanta Magazine | 通俗科学报道 |
+你也可以直接浏览下方列表，手动把感兴趣的源加入 `data/config.json`。
 
 ---
 
-## 🤝 贡献你的信息源
+### 地缘经济 / 贸易 / 产业政策
 
-我们非常欢迎社区贡献！如果你有优质的信息源想要分享：
+| 类型 | 信息源 | 说明 |
+|------|--------|------|
+| RSS | Financial Times World | 全球贸易、政策、市场与经济治国术报道 |
+| RSS | WSJ World News | 兼具商业与政策视角的国际报道 |
+| RSS | Foreign Policy | 外交政策、经济与战略的专业报道与分析 |
+| RSS | POLITICO Europe Trade | 布鲁塞尔贸易防御、产业政策与监管报道 |
+
+### 全球事务 / 国际突发动态
+
+| 类型 | 信息源 | 说明 |
+|------|--------|------|
+| RSS | BBC World | BBC 驻外记者网络的广泛国际报道 |
+| RSS | DW English | 以欧洲视角报道外交、安全与经济议题 |
+| RSS | RFI International | 覆盖非洲、欧洲与中东较强的国际日报道 |
+| RSS | France 24 English | 持续更新的国际报道与地区连线 |
+
+### 欧洲 / 布鲁塞尔 / 跨大西洋政策
+
+| 类型 | 信息源 | 说明 |
+|------|--------|------|
+| RSS | POLITICO Europe Economy | 欧盟财政、产业与竞争政策报道 |
+| RSS | POLITICO Europe Trade | 贸易争端、关税与布鲁塞尔规则制定 |
+| RSS | POLITICO Europe Energy | 欧洲能源安全与气候政策报道 |
+| RSS | Financial Times World | 欧洲与跨大西洋外溢影响背景 |
+
+### 印太 / 中国 / 亚洲
+
+| 类型 | 信息源 | 说明 |
+|------|--------|------|
+| RSS | The Diplomat | 亚太战略、外交与政治经济报道 |
+| RSS | Nikkei Asia | 亚洲政治、商业、市场与供应链报道 |
+| RSS | Foreign Policy | 将亚洲议题连接到更大策略背景的分析 |
+
+### 能源 / 大宗商品 / 航运
+
+| 类型 | 信息源 | 说明 |
+|------|--------|------|
+| RSS | POLITICO Europe Energy | 欧洲能源安全、基础设施与监管 |
+| RSS | Financial Times World | 大宗商品、航运与宏观外溢报道 |
+| RSS | Nikkei Asia | 亚洲供应链、航道与产业风险敞口 |
+
+### 主权金融 / 宏观风险
+
+| 类型 | 信息源 | 说明 |
+|------|--------|------|
+| RSS | Financial Times World | 全球宏观、主权压力与政策传导 |
+| RSS | WSJ World News | 跨境金融与政策影响报道 |
+| RSS | POLITICO Europe Economy | 欧元区、财政规则与竞争政策 |
+| RSS | Nikkei Asia | 亚洲资本流动、产业战略与国家支持型金融 |
+
+---
+
+## 贡献你的信息源
+
+我们欢迎社区补充高质量的国际事务信息源：
 
 1. Fork [Horizon 仓库](https://github.com/thysrael/Horizon)
-2. 编辑 `data/presets.json`，在合适的领域下添加你的源
+2. 编辑 `data/presets.json`
 3. 提交 Pull Request
 
-**贡献指南**：
+建议优先提交：
 
-- 确保信息源**活跃且定期更新**
-- 信息源应有**较高的信噪比**
-- 同时提供 `description`（英文）和 `description_zh`（中文）
-- 添加合适的 `tags` 便于关键词匹配
-- 在合适的 `domain` 下添加，或创建新的 domain
-
-示例格式：
-
-```json
-{
-  "type": "rss",
-  "description": "Your source description",
-  "description_zh": "你的信息源描述",
-  "tags": ["topic1", "topic2"],
-  "config": {
-    "name": "Source Name",
-    "url": "https://example.com/feed.xml",
-    "category": "your-category"
-  }
-}
-```
+- 由专业新闻机构、记者站或资深通讯员持续维护的源
+- 在贸易、制裁、产业政策、能源安全、主权金融、地区外交等方向有明确专长的源
+- 同时提供 `description` 和 `description_zh`
+- 添加清晰的 `tags` 与 `keywords`，帮助向导正确匹配
 
 </div>
 
@@ -125,114 +90,79 @@ Horizon 内置了一套精心整理的信息源预设库，覆盖多个技术领
 
 ## Source Preset Library
 
-Horizon includes a curated library of information source presets across multiple technology domains. When you run the `horizon-wizard` wizard, it automatically matches sources to your interests.
+Horizon ships with a preset library built around geoeconomics, foreign policy, and international affairs. When you run `horizon-wizard`, it matches your interest keywords against these domains and recommends sources that lean heavily toward professional newsroom reporting.
 
-You can also browse the list below and manually add sources to your `data/config.json`.
-
----
-
-### 🤖 AI / Machine Learning
-
-| Type | Source | Description |
-|------|--------|-------------|
-| Reddit | r/MachineLearning | Top ML research discussions |
-| Reddit | r/LocalLLaMA | Local LLM community — model releases, benchmarks, deployment tips |
-| RSS | Simon Willison | LLM tools and experiments |
-| GitHub | @karpathy | AI educator and researcher |
-| GitHub | vllm-project/vllm | High-throughput LLM serving engine |
-| RSS | QbitAI (量子位) | Chinese AI news and research coverage |
-| RSS | AI新智元 | Chinese AI news, model releases and industry insights |
-
-### 🖥️ Systems / Infrastructure
-
-| Type | Source | Description |
-|------|--------|-------------|
-| RSS | LWN.net | Linux and kernel news |
-| Reddit | r/linux | Linux community discussions |
-| RSS | Brendan Gregg | Performance and systems |
-| GitHub | @torvalds | Linux creator |
-
-### 🔒 Security / Privacy
-
-| Type | Source | Description |
-|------|--------|-------------|
-| Reddit | r/netsec | Information security community |
-| RSS | Krebs on Security | Investigative security journalism |
-| RSS | Schneier on Security | Security analysis and commentary |
-
-### 🌐 Web Development
-
-| Type | Source | Description |
-|------|--------|-------------|
-| Reddit | r/webdev | Web development community |
-| Reddit | r/javascript | JavaScript discussions and news |
-| RSS | CSS-Tricks | Frontend tips and techniques |
-
-### 🔤 Programming Languages / Compilers
-
-| Type | Source | Description |
-|------|--------|-------------|
-| Reddit | r/ProgrammingLanguages | Programming language design and theory |
-| Reddit | r/rust | Rust programming community |
-| GitHub | rust-lang/rust | Rust language releases |
-| GitHub | ziglang/zig | Zig language releases |
-
-### 🤖 Embedded / Robotics / Hardware
-
-| Type | Source | Description |
-|------|--------|-------------|
-| Reddit | r/robotics | Robotics research and projects |
-| Reddit | r/embedded | Embedded systems development |
-| RSS | Hackaday | Hardware hacking and projects |
-
-### 🛠️ Open Source / DevTools
-
-| Type | Source | Description |
-|------|--------|-------------|
-| RSS | GitHub Trending | Daily popular repositories |
-| Reddit | r/commandline | Command line tools and tips |
-| GitHub | neovim/neovim | Neovim editor releases |
-
-### 🔬 Science / Research
-
-| Type | Source | Description |
-|------|--------|-------------|
-| Reddit | r/science | Science news and discussions |
-| RSS | Nature | Latest research highlights |
-| RSS | Quanta Magazine | Accessible science journalism |
+You can also browse the list below and manually add any source to `data/config.json`.
 
 ---
 
-## 🤝 Contribute Your Sources
+### Geoeconomics / Trade / Industrial Policy
 
-We welcome community contributions! If you have high-quality sources to share:
+| Type | Source | Description |
+|------|--------|-------------|
+| RSS | Financial Times World | Global reporting on trade, policy, markets and economic statecraft |
+| RSS | WSJ World News | International reporting with a strong business and policy frame |
+| RSS | Foreign Policy | Specialist reporting and analysis on foreign policy, economics and strategy |
+| RSS | POLITICO Europe Trade | Brussels coverage of trade defense, industrial policy and regulation |
+
+### Global Affairs / Breaking International News
+
+| Type | Source | Description |
+|------|--------|-------------|
+| RSS | BBC World | Broad international newsgathering from BBC correspondents |
+| RSS | DW English | Europe-centered reporting on diplomacy, security and economics |
+| RSS | RFI International | Daily international reporting with strong Africa, Europe and Middle East coverage |
+| RSS | France 24 English | Rolling international coverage with frequent regional dispatches |
+
+### Europe / Brussels / Transatlantic Policy
+
+| Type | Source | Description |
+|------|--------|-------------|
+| RSS | POLITICO Europe Economy | EU fiscal, industrial and competition policy coverage |
+| RSS | POLITICO Europe Trade | Reporting on trade disputes, tariffs and Brussels rulemaking |
+| RSS | POLITICO Europe Energy | European energy security and climate-policy reporting |
+| RSS | Financial Times World | Cross-border context on Europe and transatlantic spillovers |
+
+### Indo-Pacific / China / Asia
+
+| Type | Source | Description |
+|------|--------|-------------|
+| RSS | The Diplomat | Asia-Pacific reporting on strategy, diplomacy and political economy |
+| RSS | Nikkei Asia | Reporting on Asian politics, business, markets and supply chains |
+| RSS | Foreign Policy | Regional analysis that connects Asia stories to wider strategy |
+
+### Energy / Commodities / Shipping
+
+| Type | Source | Description |
+|------|--------|-------------|
+| RSS | POLITICO Europe Energy | Energy security, infrastructure and regulation in Europe |
+| RSS | Financial Times World | Market-moving coverage of commodities, shipping and macro spillovers |
+| RSS | Nikkei Asia | Useful on Asian supply chains, shipping lanes and industrial exposure |
+
+### Sovereign Finance / Macro Risk
+
+| Type | Source | Description |
+|------|--------|-------------|
+| RSS | Financial Times World | Global macro, sovereign stress and policy transmission |
+| RSS | WSJ World News | Strong on cross-border financial and policy implications |
+| RSS | POLITICO Europe Economy | Eurozone, fiscal rules and competition-policy coverage |
+| RSS | Nikkei Asia | Asia-facing view on capital flows, industrial strategy and state-backed finance |
+
+---
+
+## Contribute Your Sources
+
+We welcome additions to the preset library:
 
 1. Fork the [Horizon repository](https://github.com/thysrael/Horizon)
-2. Edit `data/presets.json` and add your source under the appropriate domain
+2. Edit `data/presets.json`
 3. Submit a Pull Request
 
-**Contribution guidelines**:
+Best additions are usually:
 
-- Ensure the source is **actively maintained** and regularly updated
-- It should have a **high signal-to-noise ratio**
-- Provide both `description` (English) and `description_zh` (Chinese)
-- Add appropriate `tags` for keyword matching
-- Place it under a fitting `domain`, or create a new one
-
-Example format:
-
-```json
-{
-  "type": "rss",
-  "description": "Your source description",
-  "description_zh": "你的信息源描述",
-  "tags": ["topic1", "topic2"],
-  "config": {
-    "name": "Source Name",
-    "url": "https://example.com/feed.xml",
-    "category": "your-category"
-  }
-}
-```
+- Professionally reported sources maintained by established newsrooms or specialist correspondents
+- Clearly differentiated coverage on trade, sanctions, industrial policy, energy security, sovereign finance, or regional diplomacy
+- Sources that include both `description` and `description_zh`
+- Entries with strong `tags` and domain keywords so the wizard can match them accurately
 
 </div>

@@ -16,26 +16,8 @@
     },
     "rss": [
       {
-        "name": "The Diplomat",
-        "url": "https://thediplomat.com/feed/",
-        "enabled": true,
-        "category": "indo-pacific"
-      },
-      {
-        "name": "DW English",
-        "url": "https://rss.dw.com/rdf/rss-en-all",
-        "enabled": true,
-        "category": "world-news"
-      },
-      {
-        "name": "BBC World",
+        "name": "BBC News World",
         "url": "https://feeds.bbci.co.uk/news/world/rss.xml",
-        "enabled": true,
-        "category": "world-news"
-      },
-      {
-        "name": "RFI International",
-        "url": "https://www.rfi.fr/en/international/rss",
         "enabled": true,
         "category": "world-news"
       },
@@ -46,10 +28,10 @@
         "category": "global-economy"
       },
       {
-        "name": "Foreign Policy",
-        "url": "https://foreignpolicy.com/feed/",
+        "name": "The Diplomat",
+        "url": "https://thediplomat.com/feed/",
         "enabled": true,
-        "category": "foreign-policy"
+        "category": "indo-pacific"
       },
       {
         "name": "Nikkei Asia",
@@ -58,22 +40,22 @@
         "category": "asia-economy"
       },
       {
-        "name": "WSJ World News",
-        "url": "https://feeds.a.dj.com/rss/RSSWorldNews.xml",
+        "name": "International Crisis Group",
+        "url": "https://www.crisisgroup.org/rss",
+        "enabled": true,
+        "category": "conflict-tracker"
+      },
+      {
+        "name": "Deutsche Welle World",
+        "url": "https://rss.dw.com/rdf/rss-en-world",
         "enabled": true,
         "category": "world-news"
       },
       {
-        "name": "POLITICO Europe Trade",
-        "url": "https://www.politico.eu/section/trade/feed/",
+        "name": "Al Jazeera English",
+        "url": "https://www.aljazeera.com/xml/rss/all.xml",
         "enabled": true,
-        "category": "trade-policy"
-      },
-      {
-        "name": "POLITICO Europe Energy",
-        "url": "https://www.politico.eu/section/energy/feed/",
-        "enabled": true,
-        "category": "energy-security"
+        "category": "world-news"
       }
     ],
     "reddit": {
@@ -89,6 +71,6 @@
   },
   "filtering": {
     "ai_score_threshold": 7.0,
-    "time_window_hours": 24
+    "time_window_hours": 36
   }
 }

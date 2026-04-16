@@ -168,7 +168,7 @@ Content is scored 0-10:
 ```json
 {
   "filtering": {
-    "ai_score_threshold": 7.0,
+    "ai_score_threshold": 8.0,
     "time_window_hours": 24
   }
 }

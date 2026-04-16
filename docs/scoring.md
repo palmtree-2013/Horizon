@@ -40,12 +40,12 @@ Engagement metadata is source-specific: HN provides score and comment count, Red
 
 ## Filtering
 
-After scoring, items are filtered by `filtering.ai_score_threshold` (default: `7.0`) and sorted by score descending. Only items meeting the threshold appear in the daily summary.
+After scoring, items are filtered by `filtering.ai_score_threshold` (default: `8.0`) and sorted by score descending. Only items meeting the threshold appear in the daily summary.
 
 ```json
 {
   "filtering": {
-    "ai_score_threshold": 7.0,
+    "ai_score_threshold": 8.0,
     "time_window_hours": 24
   }
 }

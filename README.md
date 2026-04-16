@@ -80,7 +80,7 @@ Horizon collects news from multiple customizable sources, uses AI to score and f
 1. **Fetch** — Pull latest content from all configured sources concurrently
 2. **Deduplicate** — Merge items pointing to the same URL across different platforms
 3. **Score** — AI rates each item 0-10 based on geopolitical significance, credibility, and impact
-4. **Filter** — Keep only items above your configured threshold (default: 6.0)
+4. **Filter** — Keep only items above your configured threshold (default: 8.0)
 5. **Enrich** — For high-scoring items, search the web for background context and collect community discussions
 6. **Summarize** — Generate a structured Markdown report with summaries, tags, and references
 7. **Deploy** — Optionally publish to GitHub Pages as a daily-updated static site

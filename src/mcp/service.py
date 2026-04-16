@@ -274,9 +274,13 @@ class HorizonPipelineService:
         if not items:
             raise HorizonMcpError(code="HZ_EMPTY_INPUT", message="No items available for scoring.")
 
+        storage = make_storage(ctx.runtime, ctx.config_path)
+        orchestrator = make_orchestrator(ctx.runtime, ctx.config, storage)
+        pre_scored_items = orchestrator.merge_pre_score_duplicates(items)
+
         ai_client = ctx.runtime.create_ai_client(ctx.config.ai)
         analyzer = ctx.runtime.ContentAnalyzer(ai_client)
-        scored_items = await analyzer.analyze_batch(items)
+        scored_items = await analyzer.analyze_batch(pre_scored_items)
 
         self.run_store.save_items(run_id, "scored", items_to_dicts(scored_items))
         score_threshold = ctx.config.filtering.ai_score_threshold
@@ -288,6 +292,7 @@ class HorizonPipelineService:
                 "scored_count": len(scored_items),
                 "scored_threshold": score_threshold,
                 "scored_above_threshold": len(above_threshold),
+                "pre_score_dedup_removed": len(items) - len(pre_scored_items),
             },
         )
 
@@ -295,6 +300,7 @@ class HorizonPipelineService:
             "run_id": run_id,
             "scored": len(scored_items),
             "above_threshold": len(above_threshold),
+            "pre_score_dedup_removed": len(items) - len(pre_scored_items),
             "score_distribution": self._score_distribution(scored_items),
             "artifact": str((self.run_store.run_dir(run_id) / "scored_items.json").resolve()),
             "meta": meta,

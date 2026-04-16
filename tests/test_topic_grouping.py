@@ -85,6 +85,77 @@ def test_merge_topic_duplicates_groups_closely_related_items(monkeypatch) -> Non
     assert item.metadata["sources"] == item.metadata["cluster_references"]
 
 
+def test_merge_pre_score_duplicates_merges_same_title_across_feeds() -> None:
+    orchestrator = HorizonOrchestrator(SimpleNamespace(ai=SimpleNamespace(), email=None), SimpleNamespace())
+
+    primary = make_item(
+        "item-1",
+        "EU agrees on new sanctions package",
+        "https://example.com/sanctions-1",
+        0.0,
+        "",
+        [],
+        "Primary content",
+    )
+    primary.metadata["feed_name"] = "Feed A"
+
+    related = make_item(
+        "item-2",
+        "EU agrees on new sanctions package!",
+        "https://example.com/sanctions-2",
+        0.0,
+        "",
+        [],
+        "Related content",
+    )
+    related.metadata["feed_name"] = "Feed B"
+
+    merged = orchestrator.merge_pre_score_duplicates([primary, related])
+
+    assert len(merged) == 1
+    item = merged[0]
+    assert item.metadata["pre_score_duplicate_count"] == 2
+    assert item.metadata["pre_score_titles"] == [
+        "EU agrees on new sanctions package",
+        "EU agrees on new sanctions package!",
+    ]
+    assert item.metadata["sources"] == [
+        {"url": "https://example.com/sanctions-1", "title": "EU agrees on new sanctions package"},
+        {"url": "https://example.com/sanctions-2", "title": "EU agrees on new sanctions package!"},
+    ]
+    assert "Related content" in (item.content or "")
+
+
+def test_merge_pre_score_duplicates_keeps_same_title_from_same_feed_separate() -> None:
+    orchestrator = HorizonOrchestrator(SimpleNamespace(ai=SimpleNamespace(), email=None), SimpleNamespace())
+
+    first = make_item(
+        "item-1",
+        "Live updates from summit",
+        "https://example.com/live-1",
+        0.0,
+        "",
+        [],
+        "First content",
+    )
+    first.metadata["feed_name"] = "Feed A"
+
+    second = make_item(
+        "item-2",
+        "Live updates from summit",
+        "https://example.com/live-2",
+        0.0,
+        "",
+        [],
+        "Second content",
+    )
+    second.metadata["feed_name"] = "Feed A"
+
+    merged = orchestrator.merge_pre_score_duplicates([first, second])
+
+    assert len(merged) == 2
+
+
 def test_summary_references_include_cluster_links_and_enrichment_sources() -> None:
     item = make_item(
         "item-1",

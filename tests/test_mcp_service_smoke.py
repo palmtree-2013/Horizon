@@ -22,6 +22,8 @@ def make_item(item_id: str, score: float | None = None) -> ContentItem:
     )
     item.ai_score = score
     return item
+
+
 def test_validate_config_smoke(tmp_path: Path) -> None:
     repo_root = Path(__file__).resolve().parents[1]
     config_path = tmp_path / "config.json"
@@ -142,3 +144,51 @@ def test_filter_items_uses_public_topic_dedup_api(tmp_path: Path, monkeypatch) -
     assert result["kept"] == 1
     assert result["removed_by_topic_dedup"] == 1
     assert service.run_store.load_items("run-topic-dedup", "filtered")[0]["id"] == "item-1"
+
+
+def test_score_items_uses_public_pre_score_dedup_api(tmp_path: Path, monkeypatch) -> None:
+    service = HorizonPipelineService(runs_root=tmp_path / "mcp-runs")
+    service.run_store.create_run("run-pre-score-dedup")
+    monkeypatch.setattr("src.mcp.service.make_storage", lambda runtime, config_path: object())
+
+    class FakeOrchestrator:
+        def merge_pre_score_duplicates(self, items):  # type: ignore[no-untyped-def]
+            return items[:1]
+
+    class FakeAnalyzer:
+        def __init__(self, client):  # type: ignore[no-untyped-def]
+            pass
+
+        async def analyze_batch(self, items):  # type: ignore[no-untyped-def]
+            for item in items:
+                item.ai_score = 8.0
+            return items
+
+    monkeypatch.setattr(
+        "src.mcp.service.make_orchestrator",
+        lambda runtime, config, storage: FakeOrchestrator(),
+    )
+    monkeypatch.setattr(
+        service,
+        "_load_stage_items",
+        lambda **kwargs: (
+            [make_item("item-1"), make_item("item-2")],
+            SimpleNamespace(
+                runtime=SimpleNamespace(
+                    create_ai_client=lambda config: object(),
+                    ContentAnalyzer=FakeAnalyzer,
+                ),
+                config_path=tmp_path / "config.json",
+                config=SimpleNamespace(
+                    ai=SimpleNamespace(),
+                    filtering=SimpleNamespace(ai_score_threshold=7.0),
+                ),
+            ),
+        ),
+    )
+
+    result = asyncio.run(service.score_items(run_id="run-pre-score-dedup"))
+
+    assert result["scored"] == 1
+    assert result["pre_score_dedup_removed"] == 1
+    assert service.run_store.load_items("run-pre-score-dedup", "scored")[0]["id"] == "item-1"

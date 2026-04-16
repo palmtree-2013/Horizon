@@ -3,6 +3,7 @@
 import asyncio
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
+import re
 from typing import List, Dict, Any
 from urllib.parse import urlparse
 import httpx
@@ -73,8 +74,16 @@ class HorizonOrchestrator:
                     f"→ {len(merged_items)} unique items\n"
                 )
 
+            # 3.5 Merge exact or near-exact title duplicates before scoring
+            pre_scored_items = self.merge_pre_score_duplicates(merged_items)
+            if len(pre_scored_items) < len(merged_items):
+                self.console.print(
+                    f"🪶 Merged {len(merged_items) - len(pre_scored_items)} pre-score title duplicates "
+                    f"→ {len(pre_scored_items)} items to score\n"
+                )
+
             # 4. Analyze with AI
-            analyzed_items = await self._analyze_content(merged_items)
+            analyzed_items = await self._analyze_content(pre_scored_items)
             self.console.print(f"🤖 Analyzed {len(analyzed_items)} items with AI\n")
 
             # 5. Filter by score threshold
@@ -280,6 +289,22 @@ class HorizonOrchestrator:
             return meta["repo"]
         return item.author or "unknown"
 
+    @staticmethod
+    def _normalize_url(url: str) -> str:
+        """Normalize URL for duplicate detection."""
+        parsed = urlparse(str(url))
+        host = parsed.hostname or ""
+        if host.startswith("www."):
+            host = host[4:]
+        path = parsed.path.rstrip("/")
+        return f"{host}{path}"
+
+    @staticmethod
+    def _normalize_title(title: str) -> str:
+        """Normalize titles for cheap pre-score deduplication."""
+        normalized = re.sub(r"[^\w]+", " ", title.casefold())
+        return re.sub(r"\s+", " ", normalized).strip()
+
     def merge_cross_source_duplicates(self, items: List[ContentItem]) -> List[ContentItem]:
         """Merge items that point to the same URL from different sources.
 
@@ -293,19 +318,10 @@ class HorizonOrchestrator:
         Returns:
             List[ContentItem]: Deduplicated items
         """
-        def normalize_url(url: str) -> str:
-            parsed = urlparse(str(url))
-            # Strip www prefix, trailing slashes, and fragments
-            host = parsed.hostname or ""
-            if host.startswith("www."):
-                host = host[4:]
-            path = parsed.path.rstrip("/")
-            return f"{host}{path}"
-
         # Group by normalized URL
         url_groups: Dict[str, List[ContentItem]] = {}
         for item in items:
-            key = normalize_url(str(item.url))
+            key = self._normalize_url(str(item.url))
             url_groups.setdefault(key, []).append(item)
 
         merged = []
@@ -332,6 +348,59 @@ class HorizonOrchestrator:
                         primary.content = (primary.content or "") + f"\n\n--- From {item.source_type.value} ---\n" + item.content
 
             primary.metadata["merged_sources"] = list(all_sources)
+            merged.append(primary)
+
+        return merged
+
+    def merge_pre_score_duplicates(self, items: List[ContentItem]) -> List[ContentItem]:
+        """Merge exact or near-exact title duplicates before AI scoring.
+
+        This is intentionally conservative. It only merges items whose
+        normalized titles match exactly after punctuation/case normalization
+        and that came from different sub-sources.
+        """
+        title_groups: Dict[str, List[ContentItem]] = {}
+        for item in items:
+            key = self._normalize_title(item.title)
+            if not key:
+                key = f"item:{item.id}"
+            title_groups.setdefault(key, []).append(item)
+
+        merged: List[ContentItem] = []
+        for group in title_groups.values():
+            if len(group) == 1:
+                merged.append(group[0])
+                continue
+
+            sub_sources = {f"{item.source_type.value}/{self._sub_source_label(item)}" for item in group}
+            if len(sub_sources) == 1:
+                merged.extend(group)
+                continue
+
+            primary = max(group, key=lambda x: len(x.content or ""))
+            grouped_sources = []
+            grouped_titles: list[str] = []
+            all_sources = set(primary.metadata.get("merged_sources") or [])
+
+            for item in group:
+                all_sources.add(item.source_type.value)
+                grouped_sources.append({"url": str(item.url), "title": item.title})
+                if item.title not in grouped_titles:
+                    grouped_titles.append(item.title)
+                for mk, mv in item.metadata.items():
+                    if mk not in primary.metadata or not primary.metadata[mk]:
+                        primary.metadata[mk] = mv
+                if item is not primary and item.content:
+                    if not primary.content or item.content not in primary.content:
+                        primary.content = (primary.content or "") + f"\n\n--- From {item.source_type.value} ---\n{item.content}"
+
+            primary.metadata["merged_sources"] = list(all_sources)
+            primary.metadata["pre_score_duplicate_count"] = len(group)
+            primary.metadata["pre_score_titles"] = grouped_titles
+            primary.metadata["sources"] = self._merge_reference_lists(
+                primary.metadata.get("sources") or [],
+                grouped_sources,
+            )
             merged.append(primary)
 
         return merged

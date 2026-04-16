@@ -272,7 +272,7 @@ def build_config(
     )
 
     filtering = FilteringConfig(
-        ai_score_threshold=7.0,
+        ai_score_threshold=8.0,
         time_window_hours=24,
     )
 

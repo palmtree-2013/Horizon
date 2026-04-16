@@ -150,7 +150,7 @@ class EmailConfig(BaseModel):
 class FilteringConfig(BaseModel):
     """Content filtering configuration."""
 
-    ai_score_threshold: float = 7.0
+    ai_score_threshold: float = 8.0
     time_window_hours: int = 24
 
 

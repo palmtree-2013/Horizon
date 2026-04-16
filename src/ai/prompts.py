@@ -6,6 +6,7 @@ Rules:
 - Group items when they describe the same developing story, policy track, negotiation, escalation cycle, corporate case, or tightly connected set of developments
 - Use titles, tags, and summaries together; overlapping tags are strong evidence when the underlying topic is clearly shared
 - It is acceptable to group follow-up coverage from different outlets if a reader would expect them in one digest item
+- Only group items when there is a clear shared triggering event, decision, negotiation track, or confrontation episode
 - Group outcome + consequence coverage together when they stem from the same core event
 - Group decision + reaction coverage together when the reaction is directly about that same decision
 - Group negotiation + obstacle/boycott/response coverage together when they refer to the same talks
@@ -13,6 +14,9 @@ Rules:
 - Group strike/ceasefire/talks follow-ups together only when they concern the same concrete diplomatic or military episode
 - Do NOT group items that merely share a country, conflict, or broad theme but discuss meaningfully different developments
 - Do NOT group items that only share "Ukraine", "China", "Iran", "EU", or another broad actor if the specific event, decision, or policy track is different
+- Do NOT group items that only share a politician, public figure, or ideological theme (for example multiple unrelated Trump stories)
+- Do NOT group two stories just because the same leader commented on them on the same day; separate ceasefire coverage and Iran-talks scheduling are different topics
+- Do NOT group opinion, cultural, or religious commentary with a separate diplomatic or policy dispute unless both pieces are explicitly about the same triggering event
 - Err on the side of keeping items separate when unsure"""
 
 TOPIC_DEDUP_USER = """The following news items have already been sorted by importance score (descending). Identify which items should be grouped into the same topic cluster.
@@ -30,6 +34,8 @@ Examples of items that should usually stay separate:
 - two different policy moves by the same country on the same day
 - two different fronts of the same war without the same concrete event
 - broad thematic analysis and a separate breaking-news event that only share geography
+- two unrelated stories that both involve Trump, the pope, or another prominent public figure
+- a ceasefire announcement and a separate item about scheduling Iran talks, even if both quote Trump
 
 Respond with valid JSON only:
 {{

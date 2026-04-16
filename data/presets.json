@@ -1,319 +1,326 @@
 {
   "domains": [
     {
-      "id": "geopolitics",
-      "name": "Geopolitics / Foreign Policy",
-      "name_zh": "地缘政治 / 外交政策",
-      "keywords": ["geopolitics", "foreign policy", "international relations", "diplomacy", "defense", "security", "sanctions", "nato", "europe", "middle east", "indo-pacific", "china", "russia", "ukraine", "taiwan", "南海", "乌克兰", "中东", "外交", "制裁", "北约", "国际关系", "地缘政治"],
+      "id": "geoeconomics",
+      "name": "Geoeconomics / Trade / Industrial Policy",
+      "name_zh": "地缘经济 / 贸易 / 产业政策",
+      "keywords": [
+        "geoeconomics",
+        "geoeconomic",
+        "geoeconomics",
+        "economic statecraft",
+        "trade",
+        "tariff",
+        "tariffs",
+        "sanctions",
+        "export controls",
+        "industrial policy",
+        "supply chains",
+        "investment screening",
+        "semiconductors",
+        "economic security",
+        "trade war",
+        "地缘经济",
+        "贸易",
+        "关税",
+        "制裁",
+        "出口管制",
+        "产业政策",
+        "供应链",
+        "经济安全",
+        "贸易战"
+      ],
       "sources": [
         {
-          "type": "reddit_subreddit",
-          "description": "Geopolitics discussions and link analysis",
-          "description_zh": "地缘政治讨论与链接分析",
-          "tags": ["geopolitics", "analysis"],
-          "config": { "subreddit": "geopolitics", "sort": "hot", "fetch_limit": 20, "min_score": 20 }
-        },
-        {
-          "type": "reddit_subreddit",
-          "description": "Defense and military posture discussion with higher signal than general news",
-          "description_zh": "相较泛新闻更高信噪比的防务与军事态势讨论",
-          "tags": ["defense", "security"],
-          "config": { "subreddit": "CredibleDefense", "sort": "hot", "fetch_limit": 15, "min_score": 40 }
+          "type": "rss",
+          "description": "Financial Times World — global reporting on trade, policy, markets and economic statecraft",
+          "description_zh": "Financial Times World — 聚焦贸易、政策、市场与经济治国术的全球报道",
+          "tags": ["trade", "markets", "policy"],
+          "config": { "name": "Financial Times World", "url": "https://www.ft.com/world?format=rss", "category": "global-economy" }
         },
         {
           "type": "rss",
-          "description": "Reuters World — fast-moving international developments",
-          "description_zh": "Reuters World — 国际局势快速动态",
-          "tags": ["breaking", "world"],
-          "config": { "name": "Reuters World", "url": "https://feeds.reuters.com/Reuters/worldNews", "category": "breaking-news" }
+          "description": "WSJ World News — international reporting with a strong business and policy frame",
+          "description_zh": "WSJ World News — 兼具商业与政策视角的国际报道",
+          "tags": ["world", "business", "policy"],
+          "config": { "name": "WSJ World News", "url": "https://feeds.a.dj.com/rss/RSSWorldNews.xml", "category": "world-news" }
         },
         {
           "type": "rss",
-          "description": "The Diplomat — Asia-Pacific geopolitics and regional security analysis",
-          "description_zh": "The Diplomat — 亚太地缘政治与区域安全分析",
-          "tags": ["asia", "security"],
-          "config": { "name": "The Diplomat", "url": "https://thediplomat.com/feed/", "category": "asia-pacific" }
+          "description": "Foreign Policy — specialist reporting and analysis on foreign policy, economics and strategy",
+          "description_zh": "Foreign Policy — 聚焦外交政策、经济与战略的专业报道与分析",
+          "tags": ["foreign-policy", "analysis", "strategy"],
+          "config": { "name": "Foreign Policy", "url": "https://foreignpolicy.com/feed/", "category": "foreign-policy" }
         },
         {
           "type": "rss",
-          "description": "Geopolitical Monitor — geopolitical risk and strategic analysis",
-          "description_zh": "Geopolitical Monitor — 地缘风险与战略分析",
-          "tags": ["risk", "analysis"],
-          "config": { "name": "Geopolitical Monitor", "url": "https://www.geopoliticalmonitor.com/feed/", "category": "analysis" }
+          "description": "POLITICO Europe Trade — Brussels coverage of trade defense, industrial policy and regulation",
+          "description_zh": "POLITICO Europe Trade — 聚焦布鲁塞尔贸易防御、产业政策与监管的报道",
+          "tags": ["trade", "eu", "regulation"],
+          "config": { "name": "POLITICO Europe Trade", "url": "https://www.politico.eu/section/trade/feed/", "category": "trade-policy" }
         }
       ]
     },
     {
-      "id": "ai-ml",
-      "name": "AI / Machine Learning",
-      "name_zh": "人工智能 / 机器学习",
-      "keywords": ["ai", "ml", "llm", "大模型", "机器学习", "deep learning", "深度学习", "neural network", "gpt", "transformer", "diffusion", "生成式", "nlp", "自然语言处理", "computer vision", "计算机视觉"],
+      "id": "global-affairs",
+      "name": "Global Affairs / Breaking International News",
+      "name_zh": "全球事务 / 国际突发动态",
+      "keywords": [
+        "international affairs",
+        "world news",
+        "diplomacy",
+        "foreign policy",
+        "conflict",
+        "war",
+        "ceasefire",
+        "crisis",
+        "sanctions",
+        "security",
+        "国际事务",
+        "世界新闻",
+        "外交",
+        "冲突",
+        "战争",
+        "停火",
+        "危机",
+        "制裁",
+        "安全"
+      ],
       "sources": [
         {
-          "type": "reddit_subreddit",
-          "description": "Top ML research discussions",
-          "description_zh": "机器学习研究讨论",
-          "tags": ["ml", "research"],
-          "config": { "subreddit": "MachineLearning", "sort": "hot", "fetch_limit": 15, "min_score": 60 }
-        },
-        {
-          "type": "reddit_subreddit",
-          "description": "Local LLM community — model releases, benchmarks, deployment tips",
-          "description_zh": "本地大模型社区 — 模型发布、评测、部署技巧",
-          "tags": ["llm", "local"],
-          "config": { "subreddit": "LocalLLaMA", "sort": "hot", "fetch_limit": 15, "min_score": 60 }
+          "type": "rss",
+          "description": "BBC World — broad international newsgathering from BBC correspondents",
+          "description_zh": "BBC World — 来自 BBC 驻外记者网络的广泛国际报道",
+          "tags": ["breaking", "world", "diplomacy"],
+          "config": { "name": "BBC World", "url": "https://feeds.bbci.co.uk/news/world/rss.xml", "category": "global-affairs" }
         },
         {
           "type": "rss",
-          "description": "Simon Willison's blog — LLM tools and experiments",
-          "description_zh": "Simon Willison 博客 — LLM 工具与实验",
-          "tags": ["llm", "tools"],
-          "config": { "name": "Simon Willison", "url": "https://simonwillison.net/atom/everything/", "category": "ai-tools" }
-        },
-        {
-          "type": "github_user",
-          "description": "Andrej Karpathy — AI educator and researcher",
-          "description_zh": "Andrej Karpathy — AI 教育者与研究者",
-          "tags": ["ml", "education"],
-          "config": { "username": "karpathy" }
-        },
-        {
-          "type": "github_repo",
-          "description": "vLLM — high-throughput LLM serving engine",
-          "description_zh": "vLLM — 高吞吐量大模型推理引擎",
-          "tags": ["llm", "inference"],
-          "config": { "owner": "vllm-project", "repo": "vllm" }
+          "description": "DW English — Europe-centered reporting on diplomacy, security and economics",
+          "description_zh": "DW English — 以欧洲视角报道外交、安全与经济议题",
+          "tags": ["europe", "security", "economics"],
+          "config": { "name": "DW English", "url": "https://rss.dw.com/rdf/rss-en-all", "category": "world-news" }
         },
         {
           "type": "rss",
-          "description": "QbitAI (量子位) — Chinese AI news and research coverage",
-          "description_zh": "量子位 — AI 资讯与前沿报道（微信公众号）",
-          "tags": ["ai", "news", "chinese"],
-          "config": { "name": "量子位", "url": "https://wechat2rss.xlab.app/feed/7131b577c61365cb47e81000738c10d872685908.xml", "category": "ai-news" }
+          "description": "RFI International — daily international reporting with strong Africa, Europe and Middle East coverage",
+          "description_zh": "RFI International — 覆盖非洲、欧洲与中东较强的国际日报道",
+          "tags": ["africa", "middle-east", "world"],
+          "config": { "name": "RFI International", "url": "https://www.rfi.fr/en/international/rss", "category": "world-news" }
         },
         {
           "type": "rss",
-          "description": "AI新智元 — Chinese AI news, model releases and industry insights",
-          "description_zh": "新智元 — AI 资讯、模型发布与行业洞察（微信公众号）",
-          "tags": ["ai", "news", "chinese"],
-          "config": { "name": "新智元", "url": "https://wechat2rss.xlab.app/feed/ede30346413ea70dbef5d485ea5cbb95cca446e7.xml", "category": "ai-news" }
+          "description": "France 24 English — rolling international coverage with frequent regional dispatches",
+          "description_zh": "France 24 English — 持续更新的国际报道与地区连线",
+          "tags": ["breaking", "regions", "world"],
+          "config": { "name": "France 24 English", "url": "https://www.france24.com/en/rss", "category": "world-news" }
         }
       ]
     },
     {
-      "id": "systems",
-      "name": "Systems / Infrastructure",
-      "name_zh": "系统 / 基础设施",
-      "keywords": ["linux", "kernel", "os", "操作系统", "内核", "container", "容器", "kubernetes", "k8s", "docker", "distributed", "分布式", "database", "数据库", "storage", "network", "网络", "performance", "性能"],
+      "id": "europe-transatlantic",
+      "name": "Europe / Brussels / Transatlantic Policy",
+      "name_zh": "欧洲 / 布鲁塞尔 / 跨大西洋政策",
+      "keywords": [
+        "europe",
+        "eu",
+        "european union",
+        "brussels",
+        "eurozone",
+        "transatlantic",
+        "nato",
+        "ukraine",
+        "germany",
+        "france",
+        "欧洲",
+        "欧盟",
+        "布鲁塞尔",
+        "欧元区",
+        "北约",
+        "乌克兰",
+        "德国",
+        "法国"
+      ],
       "sources": [
         {
           "type": "rss",
-          "description": "LWN.net — Linux and kernel news",
-          "description_zh": "LWN.net — Linux 与内核新闻",
-          "tags": ["linux", "kernel"],
-          "config": { "name": "LWN.net", "url": "https://lwn.net/headlines/rss", "category": "linux-kernel" }
-        },
-        {
-          "type": "reddit_subreddit",
-          "description": "Linux community discussions",
-          "description_zh": "Linux 社区讨论",
-          "tags": ["linux"],
-          "config": { "subreddit": "linux", "sort": "hot", "fetch_limit": 15, "min_score": 100 }
+          "description": "POLITICO Europe Economy — EU fiscal, industrial and competition policy coverage",
+          "description_zh": "POLITICO Europe Economy — 聚焦欧盟财政、产业与竞争政策",
+          "tags": ["eu", "economy", "competition"],
+          "config": { "name": "POLITICO Europe Economy", "url": "https://www.politico.eu/section/economy/feed/", "category": "europe-policy" }
         },
         {
           "type": "rss",
-          "description": "Brendan Gregg's blog — performance and systems",
-          "description_zh": "Brendan Gregg 博客 — 性能与系统",
-          "tags": ["performance", "systems"],
-          "config": { "name": "Brendan Gregg", "url": "https://www.brendangregg.com/blog/rss.xml", "category": "systems" }
+          "description": "POLITICO Europe Trade — reporting on trade disputes, tariffs and Brussels rulemaking",
+          "description_zh": "POLITICO Europe Trade — 报道贸易争端、关税与布鲁塞尔规则制定",
+          "tags": ["trade", "tariffs", "brussels"],
+          "config": { "name": "POLITICO Europe Trade", "url": "https://www.politico.eu/section/trade/feed/", "category": "trade-policy" }
         },
         {
-          "type": "github_user",
-          "description": "Linus Torvalds — Linux creator",
-          "description_zh": "Linus Torvalds — Linux 之父",
-          "tags": ["linux", "kernel"],
-          "config": { "username": "torvalds" }
+          "type": "rss",
+          "description": "POLITICO Europe Energy — European energy security and climate-policy reporting",
+          "description_zh": "POLITICO Europe Energy — 聚焦欧洲能源安全与气候政策的报道",
+          "tags": ["energy", "security", "eu"],
+          "config": { "name": "POLITICO Europe Energy", "url": "https://www.politico.eu/section/energy/feed/", "category": "energy-security" }
+        },
+        {
+          "type": "rss",
+          "description": "Financial Times World — useful cross-border context on Europe and transatlantic spillovers",
+          "description_zh": "Financial Times World — 提供欧洲与跨大西洋外溢影响的跨境背景",
+          "tags": ["europe", "markets", "spillover"],
+          "config": { "name": "Financial Times World", "url": "https://www.ft.com/world?format=rss", "category": "global-economy" }
         }
       ]
     },
     {
-      "id": "security",
-      "name": "Security / Privacy",
-      "name_zh": "安全 / 隐私",
-      "keywords": ["security", "安全", "vulnerability", "漏洞", "exploit", "cve", "privacy", "隐私", "cryptography", "密码学", "malware", "恶意软件", "pentest", "渗透测试", "reverse engineering", "逆向"],
+      "id": "indo-pacific",
+      "name": "Indo-Pacific / China / Asia",
+      "name_zh": "印太 / 中国 / 亚洲",
+      "keywords": [
+        "indo-pacific",
+        "asia",
+        "china",
+        "taiwan",
+        "south china sea",
+        "japan",
+        "korea",
+        "asean",
+        "semiconductors",
+        "印太",
+        "亚洲",
+        "中国",
+        "台湾",
+        "南海",
+        "日本",
+        "韩国",
+        "东盟",
+        "半导体"
+      ],
       "sources": [
         {
-          "type": "reddit_subreddit",
-          "description": "Netsec — information security community",
-          "description_zh": "Netsec — 信息安全社区",
-          "tags": ["security"],
-          "config": { "subreddit": "netsec", "sort": "hot", "fetch_limit": 15, "min_score": 50 }
+          "type": "rss",
+          "description": "The Diplomat — Asia-Pacific reporting on strategy, diplomacy and political economy",
+          "description_zh": "The Diplomat — 聚焦亚太战略、外交与政治经济的报道",
+          "tags": ["asia", "strategy", "political-economy"],
+          "config": { "name": "The Diplomat", "url": "https://thediplomat.com/feed/", "category": "indo-pacific" }
         },
         {
           "type": "rss",
-          "description": "Krebs on Security — investigative security journalism",
-          "description_zh": "Krebs on Security — 安全调查报道",
-          "tags": ["security", "journalism"],
-          "config": { "name": "Krebs on Security", "url": "https://krebsonsecurity.com/feed/", "category": "security" }
+          "description": "Nikkei Asia — reporting on Asian politics, business, markets and supply chains",
+          "description_zh": "Nikkei Asia — 报道亚洲政治、商业、市场与供应链",
+          "tags": ["asia", "markets", "supply-chains"],
+          "config": { "name": "Nikkei Asia", "url": "https://asia.nikkei.com/rss/feed/nar", "category": "asia-economy" }
         },
         {
           "type": "rss",
-          "description": "Schneier on Security — security analysis and commentary",
-          "description_zh": "Schneier on Security — 安全分析与评论",
-          "tags": ["security", "analysis"],
-          "config": { "name": "Schneier on Security", "url": "https://www.schneier.com/feed/atom/", "category": "security" }
+          "description": "Foreign Policy — regional analysis that connects Asia stories to wider strategy",
+          "description_zh": "Foreign Policy — 将亚洲议题与更大策略背景连接起来的地区分析",
+          "tags": ["asia", "analysis", "strategy"],
+          "config": { "name": "Foreign Policy", "url": "https://foreignpolicy.com/feed/", "category": "foreign-policy" }
         }
       ]
     },
     {
-      "id": "webdev",
-      "name": "Web Development",
-      "name_zh": "Web 开发",
-      "keywords": ["web", "frontend", "前端", "backend", "后端", "javascript", "typescript", "react", "vue", "node", "css", "html", "fullstack", "全栈", "api", "rest", "graphql"],
+      "id": "energy-commodities",
+      "name": "Energy / Commodities / Shipping",
+      "name_zh": "能源 / 大宗商品 / 航运",
+      "keywords": [
+        "energy security",
+        "oil",
+        "gas",
+        "lng",
+        "opec",
+        "shipping",
+        "strait of hormuz",
+        "red sea",
+        "commodities",
+        "critical minerals",
+        "能源安全",
+        "石油",
+        "天然气",
+        "液化天然气",
+        "航运",
+        "霍尔木兹",
+        "红海",
+        "大宗商品",
+        "关键矿产"
+      ],
       "sources": [
         {
-          "type": "reddit_subreddit",
-          "description": "Web development community",
-          "description_zh": "Web 开发社区",
-          "tags": ["web", "frontend", "backend"],
-          "config": { "subreddit": "webdev", "sort": "hot", "fetch_limit": 15, "min_score": 80 }
-        },
-        {
-          "type": "reddit_subreddit",
-          "description": "JavaScript discussions and news",
-          "description_zh": "JavaScript 讨论与新闻",
-          "tags": ["javascript"],
-          "config": { "subreddit": "javascript", "sort": "hot", "fetch_limit": 10, "min_score": 60 }
+          "type": "rss",
+          "description": "POLITICO Europe Energy — energy security, infrastructure and regulation in Europe",
+          "description_zh": "POLITICO Europe Energy — 聚焦欧洲能源安全、基础设施与监管",
+          "tags": ["energy", "infrastructure", "regulation"],
+          "config": { "name": "POLITICO Europe Energy", "url": "https://www.politico.eu/section/energy/feed/", "category": "energy-security" }
         },
         {
           "type": "rss",
-          "description": "CSS-Tricks — frontend tips and techniques",
-          "description_zh": "CSS-Tricks — 前端技巧与技术",
-          "tags": ["css", "frontend"],
-          "config": { "name": "CSS-Tricks", "url": "https://css-tricks.com/feed/", "category": "frontend" }
+          "description": "Financial Times World — market-moving coverage of commodities, shipping and macro spillovers",
+          "description_zh": "Financial Times World — 报道影响市场的大宗商品、航运与宏观外溢",
+          "tags": ["commodities", "shipping", "markets"],
+          "config": { "name": "Financial Times World", "url": "https://www.ft.com/world?format=rss", "category": "global-economy" }
+        },
+        {
+          "type": "rss",
+          "description": "Nikkei Asia — useful on Asian supply chains, shipping lanes and industrial exposure",
+          "description_zh": "Nikkei Asia — 对亚洲供应链、航道与产业风险敞口的报道较强",
+          "tags": ["asia", "shipping", "supply-chains"],
+          "config": { "name": "Nikkei Asia", "url": "https://asia.nikkei.com/rss/feed/nar", "category": "asia-economy" }
         }
       ]
     },
     {
-      "id": "pl",
-      "name": "Programming Languages / Compilers",
-      "name_zh": "编程语言 / 编译器",
-      "keywords": ["programming language", "编程语言", "compiler", "编译器", "rust", "go", "zig", "haskell", "ocaml", "type system", "类型系统", "llvm", "wasm", "webassembly", "functional", "函数式"],
-      "sources": [
-        {
-          "type": "reddit_subreddit",
-          "description": "Programming language design and theory",
-          "description_zh": "编程语言设计与理论",
-          "tags": ["pl", "theory"],
-          "config": { "subreddit": "ProgrammingLanguages", "sort": "hot", "fetch_limit": 15, "min_score": 30 }
-        },
-        {
-          "type": "reddit_subreddit",
-          "description": "Rust programming community",
-          "description_zh": "Rust 编程社区",
-          "tags": ["rust"],
-          "config": { "subreddit": "rust", "sort": "hot", "fetch_limit": 15, "min_score": 60 }
-        },
-        {
-          "type": "github_repo",
-          "description": "Rust language releases",
-          "description_zh": "Rust 语言版本发布",
-          "tags": ["rust"],
-          "config": { "owner": "rust-lang", "repo": "rust" }
-        },
-        {
-          "type": "github_repo",
-          "description": "Zig language releases",
-          "description_zh": "Zig 语言版本发布",
-          "tags": ["zig"],
-          "config": { "owner": "ziglang", "repo": "zig" }
-        }
-      ]
-    },
-    {
-      "id": "embedded",
-      "name": "Embedded / Robotics / Hardware",
-      "name_zh": "嵌入式 / 机器人 / 硬件",
-      "keywords": ["embedded", "嵌入式", "robotics", "机器人", "iot", "物联网", "arduino", "raspberry pi", "rtos", "fpga", "risc-v", "hardware", "硬件", "具身智能", "embodied"],
-      "sources": [
-        {
-          "type": "reddit_subreddit",
-          "description": "Robotics research and projects",
-          "description_zh": "机器人研究与项目",
-          "tags": ["robotics"],
-          "config": { "subreddit": "robotics", "sort": "hot", "fetch_limit": 15, "min_score": 30 }
-        },
-        {
-          "type": "reddit_subreddit",
-          "description": "Embedded systems development",
-          "description_zh": "嵌入式系统开发",
-          "tags": ["embedded"],
-          "config": { "subreddit": "embedded", "sort": "hot", "fetch_limit": 15, "min_score": 30 }
-        },
-        {
-          "type": "rss",
-          "description": "Hackaday — hardware hacking and projects",
-          "description_zh": "Hackaday — 硬件创客与项目",
-          "tags": ["hardware", "maker"],
-          "config": { "name": "Hackaday", "url": "https://hackaday.com/feed/", "category": "hardware" }
-        }
-      ]
-    },
-    {
-      "id": "devtools",
-      "name": "Open Source / DevTools",
-      "name_zh": "开源 / 开发工具",
-      "keywords": ["open source", "开源", "devtools", "开发工具", "cli", "terminal", "终端", "editor", "编辑器", "vim", "neovim", "emacs", "vscode", "git", "ci/cd", "devops"],
+      "id": "sovereign-finance",
+      "name": "Sovereign Finance / Macro Risk",
+      "name_zh": "主权金融 / 宏观风险",
+      "keywords": [
+        "sovereign debt",
+        "currency",
+        "reserve currency",
+        "fx",
+        "central bank",
+        "inflation",
+        "imf",
+        "debt restructuring",
+        "macro risk",
+        "主权债务",
+        "汇率",
+        "储备货币",
+        "外汇",
+        "央行",
+        "通胀",
+        "imf",
+        "债务重组",
+        "宏观风险"
+      ],
       "sources": [
         {
           "type": "rss",
-          "description": "GitHub Trending — daily popular repositories",
-          "description_zh": "GitHub Trending — 每日热门仓库",
-          "tags": ["github", "trending"],
-          "config": { "name": "GitHub Trending - Daily", "url": "https://mshibanern.github.io/GitHubTrendingRSS/daily/all.xml", "category": "github-trending" }
-        },
-        {
-          "type": "reddit_subreddit",
-          "description": "Command line tools and tips",
-          "description_zh": "命令行工具与技巧",
-          "tags": ["cli", "terminal"],
-          "config": { "subreddit": "commandline", "sort": "hot", "fetch_limit": 10, "min_score": 40 }
-        },
-        {
-          "type": "github_repo",
-          "description": "Neovim editor releases",
-          "description_zh": "Neovim 编辑器版本发布",
-          "tags": ["editor", "neovim"],
-          "config": { "owner": "neovim", "repo": "neovim" }
-        }
-      ]
-    },
-    {
-      "id": "science",
-      "name": "Science / Research",
-      "name_zh": "科学 / 学术研究",
-      "keywords": ["science", "科学", "research", "研究", "paper", "论文", "arxiv", "physics", "物理", "math", "数学", "biology", "生物", "chemistry", "化学", "neuroscience", "神经科学"],
-      "sources": [
-        {
-          "type": "reddit_subreddit",
-          "description": "Science news and discussions",
-          "description_zh": "科学新闻与讨论",
-          "tags": ["science", "general"],
-          "config": { "subreddit": "science", "sort": "hot", "fetch_limit": 15, "min_score": 200 }
+          "description": "Financial Times World — global macro, sovereign stress and policy transmission",
+          "description_zh": "Financial Times World — 聚焦全球宏观、主权压力与政策传导",
+          "tags": ["macro", "sovereign", "policy"],
+          "config": { "name": "Financial Times World", "url": "https://www.ft.com/world?format=rss", "category": "global-economy" }
         },
         {
           "type": "rss",
-          "description": "Nature — latest research highlights",
-          "description_zh": "Nature — 最新研究亮点",
-          "tags": ["research", "journal"],
-          "config": { "name": "Nature", "url": "https://www.nature.com/nature.rss", "category": "science" }
+          "description": "WSJ World News — strong on cross-border financial and policy implications",
+          "description_zh": "WSJ World News — 擅长跨境金融与政策影响的报道",
+          "tags": ["finance", "policy", "world"],
+          "config": { "name": "WSJ World News", "url": "https://feeds.a.dj.com/rss/RSSWorldNews.xml", "category": "world-news" }
         },
         {
           "type": "rss",
-          "description": "Quanta Magazine — accessible science journalism",
-          "description_zh": "Quanta Magazine — 通俗科学报道",
-          "tags": ["science", "journalism"],
-          "config": { "name": "Quanta Magazine", "url": "https://api.quantamagazine.org/feed/", "category": "science" }
+          "description": "POLITICO Europe Economy — eurozone, fiscal rules and competition-policy coverage",
+          "description_zh": "POLITICO Europe Economy — 聚焦欧元区、财政规则与竞争政策",
+          "tags": ["eurozone", "fiscal", "competition"],
+          "config": { "name": "POLITICO Europe Economy", "url": "https://www.politico.eu/section/economy/feed/", "category": "europe-policy" }
+        },
+        {
+          "type": "rss",
+          "description": "Nikkei Asia — Asia-facing view on capital flows, industrial strategy and state-backed finance",
+          "description_zh": "Nikkei Asia — 从亚洲视角报道资本流动、产业战略与国家支持型金融",
+          "tags": ["asia", "finance", "industrial-policy"],
+          "config": { "name": "Nikkei Asia", "url": "https://asia.nikkei.com/rss/feed/nar", "category": "asia-economy" }
         }
       ]
     }

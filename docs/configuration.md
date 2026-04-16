@@ -123,10 +123,10 @@ All sources are configured under the top-level `sources` key in `config.json`.
   "sources": {
     "rss": [
       {
-        "name": "Reuters World",
-        "url": "https://feeds.reuters.com/Reuters/worldNews",
+        "name": "Financial Times World",
+        "url": "https://www.ft.com/world?format=rss",
         "enabled": true,
-        "category": "breaking-news"
+        "category": "global-economy"
       }
     ]
   }
@@ -183,8 +183,8 @@ RSS feed URLs support `${VAR_NAME}` syntax for secrets. The variable is expanded
 
 ```json
 {
-  "name": "LWN.net",
-  "url": "https://lwn.net/headlines/full_text?key=${LWN_KEY}",
+  "name": "Private research feed",
+  "url": "https://example.com/feed.xml?token=${PRIVATE_FEED_TOKEN}",
   "enabled": true
 }
 ```

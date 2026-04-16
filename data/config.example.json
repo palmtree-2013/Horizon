@@ -19,63 +19,63 @@
     "unsubscribe_keyword": "UNSUBSCRIBE"
   },
   "sources": {
-    "github": [
-      {
-        "type": "user_events",
-        "username": "torvalds",
-        "enabled": true
-      },
-      {
-        "type": "repo_releases",
-        "owner": "astral-sh",
-        "repo": "uv",
-        "enabled": true
-      }
-    ],
+    "github": [],
     "hackernews": {
-      "enabled": true,
+      "enabled": false,
       "fetch_top_stories": 20,
       "min_score": 100
     },
     "rss": [
       {
-        "name": "Simon Willison",
-        "url": "https://simonwillison.net/atom/everything/",
+        "name": "BBC World",
+        "url": "https://feeds.bbci.co.uk/news/world/rss.xml",
         "enabled": true,
-        "category": "ai-tools"
+        "category": "global-affairs"
       },
       {
-        "name": "LWN.net (subscriber full-text)",
-        "url": "https://lwn.net/headlines/full_text?key=${LWN_KEY}",
-        "enabled": false,
-        "category": "linux"
+        "name": "Financial Times World",
+        "url": "https://www.ft.com/world?format=rss",
+        "enabled": true,
+        "category": "global-economy"
+      },
+      {
+        "name": "Foreign Policy",
+        "url": "https://foreignpolicy.com/feed/",
+        "enabled": true,
+        "category": "foreign-policy"
+      },
+      {
+        "name": "Nikkei Asia",
+        "url": "https://asia.nikkei.com/rss/feed/nar",
+        "enabled": true,
+        "category": "asia-economy"
+      },
+      {
+        "name": "The Diplomat",
+        "url": "https://thediplomat.com/feed/",
+        "enabled": true,
+        "category": "indo-pacific"
+      },
+      {
+        "name": "POLITICO Europe Trade",
+        "url": "https://www.politico.eu/section/trade/feed/",
+        "enabled": true,
+        "category": "trade-policy"
       }
     ],
     "reddit": {
-      "enabled": true,
-      "subreddits": [
-        {
-          "subreddit": "MachineLearning",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 15,
-          "min_score": 50
-        }
-      ],
-      "users": [
-        {
-          "username": "iamthatis",
-          "enabled": true,
-          "sort": "new",
-          "fetch_limit": 10
-        }
-      ],
+      "enabled": false,
+      "subreddits": [],
+      "users": [],
       "fetch_comments": 5
+    },
+    "telegram": {
+      "enabled": false,
+      "channels": []
     }
   },
   "filtering": {
-    "ai_score_threshold": 6.0,
+    "ai_score_threshold": 7.0,
     "time_window_hours": 24
   }
 }

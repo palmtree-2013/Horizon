@@ -52,7 +52,7 @@ Two source types are supported:
 ```json
 {
   "type": "user_events",
-  "username": "torvalds",
+  "username": "globaldothealth",
   "enabled": true
 }
 ```
@@ -60,8 +60,8 @@ Two source types are supported:
 ```json
 {
   "type": "repo_releases",
-  "owner": "golang",
-  "repo": "go",
+  "owner": "globaldothealth",
+  "repo": "outbreak-info",
   "enabled": true
 }
 ```
@@ -78,14 +78,14 @@ Fetches any Atom/RSS feed using the `feedparser` library. Tries multiple date fi
 
 ```json
 {
-  "name": "Simon Willison",
-  "url": "https://simonwillison.net/atom/everything/",
+  "name": "Financial Times World",
+  "url": "https://www.ft.com/world?format=rss",
   "enabled": true,
-  "category": "ai-tools"
+  "category": "global-economy"
 }
 ```
 
-- `category` — optional tag for grouping (e.g., `"programming"`, `"microblog"`)
+- `category` — optional tag for grouping (e.g., `"trade-policy"`, `"global-affairs"`)
 
 **Extracted data**: title, URL, author, content (from `summary`/`description`/`content` fields), feed name, category, and entry tags.
 
@@ -109,7 +109,7 @@ Subreddits and users are fetched concurrently. Comments are sorted by score, lim
   "fetch_comments": 5,
   "subreddits": [
     {
-      "subreddit": "MachineLearning",
+      "subreddit": "geopolitics",
       "sort": "hot",
       "fetch_limit": 25,
       "min_score": 10

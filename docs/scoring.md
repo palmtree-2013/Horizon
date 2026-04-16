@@ -19,19 +19,20 @@ After fetching content from all sources, Horizon uses an AI model to score each 
 
 | Score | Tier | Description |
 |-------|------|-------------|
-| 9-10 | Groundbreaking | Major breakthroughs, paradigm shifts, major version releases, significant research breakthroughs |
-| 7-8 | High Value | Important developments, technical deep-dives, novel approaches, insightful analysis, valuable tools |
-| 5-6 | Interesting | Incremental improvements, useful tutorials, moderate community interest |
-| 3-4 | Low Priority | Minor updates, common knowledge, overly promotional |
-| 0-2 | Noise | Spam, off-topic, trivial updates |
+| 9-10 | Critical | Major sanctions, export controls, tariff moves, military escalations, diplomatic breakdowns, or market-moving state actions with broad international consequences |
+| 7-8 | High Value | Important trade, energy, sovereign-finance, industrial-policy, or regional-security developments with clear spillover |
+| 5-6 | Useful Context | Solid follow-up reporting, regional analysis, or background that helps explain a meaningful foreign-affairs story |
+| 3-4 | Low Priority | Routine updates, thin commentary, repetitive coverage, or limited-impact developments |
+| 0-2 | Noise | Off-topic, weakly sourced, propagandistic, or trivial content |
 
 ## Scoring Factors
 
 The AI evaluates each item based on:
 
-- **Technical depth and novelty** — original ideas, new techniques, research contributions
-- **Potential impact** — how broadly this affects software engineering, AI/ML, or systems research
+- **Geoeconomic and strategic significance** — relevance to trade, sanctions, industrial policy, energy security, sovereign finance, supply chains, or foreign policy
+- **Potential spillover** — how broadly this could affect regions, alliances, markets, or state behavior
 - **Quality of writing/presentation** — clarity, structure, thoroughness
+- **Source credibility** — whether the reporting appears serious, specific, and well sourced
 - **Community discussion** — insightful comments, diverse viewpoints, substantive debates
 - **Engagement signals** — high upvotes/favorites paired with substantive discussion (not just raw numbers)
 
@@ -56,12 +57,12 @@ Items scoring 9.0 or above are featured in the "Today's Highlights" section of t
 
 Items that pass the score threshold go through a second AI pass for enrichment (`src/ai/enricher.py`):
 
-1. **Concept extraction** — AI identifies 1-3 technical concepts in the item that may need explanation.
+1. **Concept extraction** — AI identifies 1-3 geoeconomic or international-affairs concepts in the item that may need explanation.
 2. **Web search** — Each concept is searched via DuckDuckGo to gather grounding context.
 3. **Structured analysis** — The item content and search results are sent to AI, which produces:
    - `whats_new` — what specifically happened or changed
    - `why_it_matters` — significance and impact
-   - `key_details` — notable technical details or caveats
+   - `key_details` — notable policy, trade, financial, or regional details and caveats
    - `background` — background knowledge for readers without deep domain expertise
 
 These fields are combined into a `detailed_summary` stored in the item's metadata and used in the final daily summary.

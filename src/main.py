@@ -26,7 +26,7 @@ def print_banner():
  | |  | | (_) | |  | |/ / | (_) | | | |
  |_|  |_|\___/|_|  |_/___| \___/|_| |_|
 [/bold blue]
-[cyan]  AI-Driven Information Aggregation System[/cyan]
+[cyan]  AI-Driven Geoeconomic Briefing System[/cyan]
     """
     console.print(banner)
 
@@ -35,7 +35,7 @@ def main():
     """Main CLI entry point."""
     print_banner()
 
-    parser = argparse.ArgumentParser(description="Horizon - AI-Driven Information Aggregation System")
+    parser = argparse.ArgumentParser(description="Horizon - AI-Driven Geoeconomic Briefing System")
     parser.add_argument("--hours", type=int, help="Force fetch from last N hours")
     parser.add_argument(
         "--background",
@@ -96,26 +96,42 @@ def print_config_template():
     "max_tokens": 4096
   },
   "sources": {
-    "github": [
-      {
-        "type": "user_events",
-        "username": "torvalds",
-        "enabled": true
-      }
-    ],
+    "github": [],
     "hackernews": {
-      "enabled": true,
+      "enabled": false,
       "fetch_top_stories": 30,
       "min_score": 100
     },
     "rss": [
       {
-        "name": "Example Blog",
-        "url": "https://example.com/feed.xml",
+        "name": "Financial Times World",
+        "url": "https://www.ft.com/world?format=rss",
         "enabled": true,
-        "category": "software-engineering"
+        "category": "global-economy"
+      },
+      {
+        "name": "Foreign Policy",
+        "url": "https://foreignpolicy.com/feed/",
+        "enabled": true,
+        "category": "foreign-policy"
+      },
+      {
+        "name": "The Diplomat",
+        "url": "https://thediplomat.com/feed/",
+        "enabled": true,
+        "category": "indo-pacific"
       }
-    ]
+    ],
+    "reddit": {
+      "enabled": false,
+      "subreddits": [],
+      "users": [],
+      "fetch_comments": 5
+    },
+    "telegram": {
+      "enabled": false,
+      "channels": []
+    }
   },
   "filtering": {
     "ai_score_threshold": 7.0,

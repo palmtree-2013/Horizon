@@ -150,11 +150,13 @@ Here's what a config looks like:
   "sources": {
     "hackernews": { "enabled": false, "fetch_top_stories": 20, "min_score": 100 },
     "rss": [
-      { "name": "Reuters World", "url": "https://feeds.reuters.com/Reuters/worldNews" },
+      { "name": "Financial Times World", "url": "https://www.ft.com/world?format=rss" },
+      { "name": "Foreign Policy", "url": "https://foreignpolicy.com/feed/" },
       { "name": "The Diplomat", "url": "https://thediplomat.com/feed/" }
     ],
     "reddit": {
-      "subreddits": [{ "subreddit": "geopolitics", "sort": "hot" }],
+      "enabled": false,
+      "subreddits": [],
       "fetch_comments": 5
     }
   },

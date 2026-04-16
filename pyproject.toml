@@ -1,7 +1,7 @@
 [project]
 name = "horizon"
 version = "0.1.0"
-description = "AI-driven information aggregation system for tracking academic and social trends"
+description = "AI-driven geoeconomic briefing system for tracking international affairs, trade, and policy"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"

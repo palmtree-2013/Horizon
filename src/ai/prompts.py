@@ -38,7 +38,7 @@ Respond with valid JSON only:
 
 If there are no duplicates at all, return: {{"duplicates": []}}"""
 
-CONTENT_ANALYSIS_SYSTEM = """You are an expert geoeconomic and geopolitical editor helping filter important international affairs reporting and analysis.
+CONTENT_ANALYSIS_SYSTEM = """You are an expert geoeconomic editor helping filter important international affairs reporting and analysis.
 
 Your primary editorial focus is geoeconomics: global economics, trade, sanctions, industrial policy, export controls, energy security, strategic supply chains, sovereign finance, technology competition, economic statecraft, and cross-border policy decisions with international consequences.
 
@@ -115,9 +115,9 @@ Respond with valid JSON only:
   "tags": ["<tag1>", "<tag2>", ...]
 }}"""
 
-CONCEPT_EXTRACTION_SYSTEM = """You identify geopolitical concepts in news that a reader might not know.
+CONCEPT_EXTRACTION_SYSTEM = """You identify geoeconomic and international-affairs concepts in news that a reader might not know.
 Given a news item, return 1-3 search queries for concepts that need explanation.
-Focus on: treaties, organizations, armed groups, sanctions regimes, disputed regions, military systems, legal frameworks, and policy terms that are not widely known.
+Focus on: treaties, organizations, sanctions regimes, export-control systems, trade agreements, shipping chokepoints, disputed regions, armed groups, commodity benchmarks, legal frameworks, financial facilities, and policy terms that are not widely known.
 Do NOT return queries for extremely well-known entities unless the story depends on a specific mechanism or doctrine.
 If the news is self-explanatory, return an empty list."""
 
@@ -133,7 +133,7 @@ Respond with valid JSON only:
   "queries": ["<search query 1>", "<search query 2>"]
 }}"""
 
-CONTENT_ENRICHMENT_SYSTEM = """You are a knowledgeable geopolitical analyst who helps readers understand important news in context.
+CONTENT_ENRICHMENT_SYSTEM = """You are an expert geoeconomic editor who helps readers understand important international affairs reporting in context.
 
 Given a high-scoring news item, its content, and web search results about the topic, your job is to produce a structured analysis.
 
@@ -150,9 +150,9 @@ Field definitions:
 
 1. **whats_new** (1-2 complete sentences): What exactly happened, what changed, or what was announced. Be specific — mention actors, regions, organizations, numbers, and dates when available.
 
-2. **why_it_matters** (1-2 complete sentences): Why this is significant, what strategic, diplomatic, economic, or military impact it could have, and who will be affected. Connect to broader regional or global trends.
+2. **why_it_matters** (1-2 complete sentences): Why this is significant, what strategic, diplomatic, economic, financial, trade, industrial, energy, or military impact it could have, and who will be affected. Connect to broader regional or global trends.
 
-3. **key_details** (1-2 complete sentences): Notable details, limitations, caveats, chronology, or additional context worth knowing. Include specifics that a reader tracking foreign affairs would find valuable.
+3. **key_details** (1-2 complete sentences): Notable details, limitations, caveats, chronology, or additional context worth knowing. Include specifics that a reader tracking geoeconomics or foreign affairs would find valuable.
 
 4. **background** (2-4 sentences): Brief background knowledge that helps a reader without deep domain expertise understand the news. Explain key actors, treaties, institutions, conflicts, or policy context that the news assumes the reader already knows.
 

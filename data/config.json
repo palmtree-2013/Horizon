@@ -38,36 +38,47 @@
         "url": "https://www.rfi.fr/en/international/rss",
         "enabled": true,
         "category": "world-news"
+      },
+      {
+        "name": "Financial Times World",
+        "url": "https://www.ft.com/world?format=rss",
+        "enabled": true,
+        "category": "global-economy"
+      },
+      {
+        "name": "Foreign Policy",
+        "url": "https://foreignpolicy.com/feed/",
+        "enabled": true,
+        "category": "foreign-policy"
+      },
+      {
+        "name": "Nikkei Asia",
+        "url": "https://asia.nikkei.com/rss/feed/nar",
+        "enabled": true,
+        "category": "asia-economy"
+      },
+      {
+        "name": "WSJ World News",
+        "url": "https://feeds.a.dj.com/rss/RSSWorldNews.xml",
+        "enabled": true,
+        "category": "world-news"
+      },
+      {
+        "name": "POLITICO Europe Trade",
+        "url": "https://www.politico.eu/section/trade/feed/",
+        "enabled": true,
+        "category": "trade-policy"
+      },
+      {
+        "name": "POLITICO Europe Energy",
+        "url": "https://www.politico.eu/section/energy/feed/",
+        "enabled": true,
+        "category": "energy-security"
       }
     ],
     "reddit": {
       "enabled": false,
-      "subreddits": [
-        {
-          "subreddit": "geopolitics",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 20,
-          "min_score": 20
-        },
-        {
-          "subreddit": "CredibleDefense",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 15,
-          "min_score": 40
-        },
-        {
-          "subreddit": "ForeignPolicy",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 15,
-          "min_score": 10
-        }
-      ],
+      "subreddits": [],
       "users": [],
       "fetch_comments": 5
     },

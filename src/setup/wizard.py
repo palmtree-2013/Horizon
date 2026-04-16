@@ -36,7 +36,7 @@ def print_banner():
  | |  | | (_) | |  | |/ / | (_) | | | |
  |_|  |_|\___/|_|  |_/___| \___/|_| |_|
 [/bold blue]
-[cyan]  Setup Wizard — Configure your news briefing sources[/cyan]
+[cyan]  Setup Wizard — Configure your geoeconomic briefing sources[/cyan]
     """
     console.print(banner)
 
@@ -245,9 +245,8 @@ def build_config(
         elif src_type == "hackernews":
             hn_enabled = True
 
-    # Always include HackerNews as a universal source
     hn_config = HackerNewsConfig(
-        enabled=True,
+        enabled=hn_enabled,
         fetch_top_stories=30,
         min_score=100,
     )
@@ -400,7 +399,7 @@ def main():
     selected = select_sources(preset_sources, ai_sources)
 
     if not selected:
-        console.print("[yellow]No sources selected. Adding HackerNews as default.[/yellow]")
+        console.print("[yellow]No sources selected. The generated config will start with source ingestion disabled.[/yellow]")
 
     # Step 6: Build config
     config = build_config(ai_config, selected)

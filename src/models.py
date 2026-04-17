@@ -153,6 +153,8 @@ class FilteringConfig(BaseModel):
 
     ai_score_threshold: float = 8.0
     time_window_hours: int = 24
+    target_keep_ratio: float = 0.2
+    max_important_items: int = 20
 
 
 class Config(BaseModel):

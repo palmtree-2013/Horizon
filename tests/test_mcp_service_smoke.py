@@ -131,7 +131,13 @@ def test_filter_items_uses_public_topic_dedup_api(tmp_path: Path, monkeypatch) -
             SimpleNamespace(
                 runtime=SimpleNamespace(),
                 config_path=tmp_path / "config.json",
-                config=SimpleNamespace(filtering=SimpleNamespace(ai_score_threshold=7.0)),
+                config=SimpleNamespace(
+                    filtering=SimpleNamespace(
+                        ai_score_threshold=7.0,
+                        target_keep_ratio=1.0,
+                        max_important_items=20,
+                    )
+                ),
             ),
         ),
     )
@@ -177,6 +183,78 @@ def test_filter_items_requires_editorial_fit(tmp_path: Path, monkeypatch) -> Non
 
     assert result["kept"] == 1
     assert service.run_store.load_items("run-editorial-fit", "filtered")[0]["id"] == "item-1"
+
+
+def test_filter_items_backfills_to_target_ratio(tmp_path: Path, monkeypatch) -> None:
+    service = HorizonPipelineService(runs_root=tmp_path / "mcp-runs")
+    service.run_store.create_run("run-target-backfill")
+
+    items = [make_item("item-1", score=9.0, editorial_fit="geoeconomic-core")]
+    items.extend(
+        make_item(f"item-{idx}", score=6.0, editorial_fit="broad-geopolitics")
+        for idx in range(2, 11)
+    )
+
+    monkeypatch.setattr(
+        service,
+        "_load_stage_items",
+        lambda **kwargs: (
+            items,
+            SimpleNamespace(
+                runtime=SimpleNamespace(),
+                config_path=tmp_path / "config.json",
+                config=SimpleNamespace(
+                    filtering=SimpleNamespace(
+                        ai_score_threshold=7.0,
+                        target_keep_ratio=0.2,
+                        max_important_items=20,
+                    )
+                ),
+            ),
+        ),
+    )
+
+    result = asyncio.run(service.filter_items(run_id="run-target-backfill", topic_dedup=False))
+
+    assert result["target_count"] == 2
+    assert result["preferred_count"] == 1
+    assert result["backfilled_count"] == 1
+    assert result["kept"] == 2
+
+
+def test_filter_items_caps_selection_at_twenty_items(tmp_path: Path, monkeypatch) -> None:
+    service = HorizonPipelineService(runs_root=tmp_path / "mcp-runs")
+    service.run_store.create_run("run-target-cap")
+
+    items = [
+        make_item(f"item-{idx}", score=9.0 - (idx / 1000), editorial_fit="geoeconomic-core")
+        for idx in range(1, 101)
+    ]
+
+    monkeypatch.setattr(
+        service,
+        "_load_stage_items",
+        lambda **kwargs: (
+            items,
+            SimpleNamespace(
+                runtime=SimpleNamespace(),
+                config_path=tmp_path / "config.json",
+                config=SimpleNamespace(
+                    filtering=SimpleNamespace(
+                        ai_score_threshold=7.0,
+                        target_keep_ratio=0.2,
+                        max_important_items=20,
+                    )
+                ),
+            ),
+        ),
+    )
+
+    result = asyncio.run(service.filter_items(run_id="run-target-cap", topic_dedup=False))
+
+    assert result["target_count"] == 20
+    assert result["kept"] == 20
+    assert result["backfilled_count"] == 0
 
 
 def test_score_items_uses_public_pre_score_dedup_api(tmp_path: Path, monkeypatch) -> None:

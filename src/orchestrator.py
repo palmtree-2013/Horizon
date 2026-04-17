@@ -23,7 +23,7 @@ from .ai.analyzer import ContentAnalyzer
 from .ai.summarizer import DailySummarizer
 from .ai.enricher import ContentEnricher
 from .ai.tokens import get_usage_snapshot
-from .ai.utils import is_editorially_eligible
+from .ai.utils import select_important_items
 
 
 class HorizonOrchestrator:
@@ -90,14 +90,20 @@ class HorizonOrchestrator:
 
             # 5. Filter by score threshold
             threshold = self.config.filtering.ai_score_threshold
-            important_items = [
-                item for item in analyzed_items
-                if item.ai_score and item.ai_score >= threshold and is_editorially_eligible(item.ai_editorial_fit)
-            ]
-            important_items.sort(key=lambda x: x.ai_score or 0, reverse=True)
+            keep_ratio = getattr(self.config.filtering, "target_keep_ratio", 0.2)
+            max_items = getattr(self.config.filtering, "max_important_items", 20)
+            important_items, selection_meta = select_important_items(
+                analyzed_items,
+                score_threshold=threshold,
+                keep_ratio=keep_ratio,
+                max_items=max_items,
+            )
 
             self.console.print(
-                f"⭐️ {len(important_items)} items scored ≥ {threshold} and matched the editorial fit\n"
+                f"⭐️ Selected {len(important_items)} items "
+                f"(target: {selection_meta['target_count']}, "
+                f"preferred ≥ {threshold}: {selection_meta['preferred_count']}, "
+                f"backfilled: {selection_meta['backfilled_count']})\n"
             )
 
             # 5.5 Semantic deduplication: drop items covering the same topic

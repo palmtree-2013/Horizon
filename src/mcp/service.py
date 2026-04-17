@@ -23,7 +23,7 @@ from .horizon_adapter import (
     resolve_horizon_path,
 )
 from .run_store import RunStore
-from ..ai.utils import is_editorially_eligible
+from ..ai.utils import select_important_items
 
 
 def _default_runs_root() -> Path:
@@ -200,6 +200,8 @@ class HorizonPipelineService:
             "filtering": {
                 "ai_score_threshold": ctx.config.filtering.ai_score_threshold,
                 "time_window_hours": ctx.config.filtering.time_window_hours,
+                "target_keep_ratio": getattr(ctx.config.filtering, "target_keep_ratio", 0.2),
+                "max_important_items": getattr(ctx.config.filtering, "max_important_items", 20),
             },
             "enabled_sources": get_enabled_sources(ctx.config),
             "selected_sources": selected_sources,
@@ -285,18 +287,24 @@ class HorizonPipelineService:
 
         self.run_store.save_items(run_id, "scored", items_to_dicts(scored_items))
         score_threshold = ctx.config.filtering.ai_score_threshold
-        above_threshold = [
-            x
-            for x in scored_items
-            if x.ai_score and x.ai_score >= score_threshold and is_editorially_eligible(x.ai_editorial_fit)
-        ]
+        keep_ratio = getattr(ctx.config.filtering, "target_keep_ratio", 0.2)
+        max_items = getattr(ctx.config.filtering, "max_important_items", 20)
+        _, selection_meta = select_important_items(
+            scored_items,
+            score_threshold=score_threshold,
+            keep_ratio=keep_ratio,
+            max_items=max_items,
+        )
 
         meta = self.run_store.update_meta(
             run_id,
             {
                 "scored_count": len(scored_items),
                 "scored_threshold": score_threshold,
-                "scored_above_threshold": len(above_threshold),
+                "scored_above_threshold": selection_meta["preferred_count"],
+                "selection_target_count": selection_meta["target_count"],
+                "selection_backfilled_count": selection_meta["backfilled_count"],
+                "selection_selectable_count": selection_meta["selectable_count"],
                 "pre_score_dedup_removed": len(items) - len(pre_scored_items),
             },
         )
@@ -304,7 +312,9 @@ class HorizonPipelineService:
         return {
             "run_id": run_id,
             "scored": len(scored_items),
-            "above_threshold": len(above_threshold),
+            "above_threshold": selection_meta["preferred_count"],
+            "target_count": selection_meta["target_count"],
+            "backfilled_count": selection_meta["backfilled_count"],
             "pre_score_dedup_removed": len(items) - len(pre_scored_items),
             "score_distribution": self._score_distribution(scored_items),
             "artifact": str((self.run_store.run_dir(run_id) / "scored_items.json").resolve()),
@@ -328,13 +338,15 @@ class HorizonPipelineService:
         )
 
         effective_threshold = threshold if threshold is not None else ctx.config.filtering.ai_score_threshold
+        keep_ratio = getattr(ctx.config.filtering, "target_keep_ratio", 0.2)
+        max_items = getattr(ctx.config.filtering, "max_important_items", 20)
 
-        important_items = [
-            item
-            for item in items
-            if item.ai_score and item.ai_score >= effective_threshold and is_editorially_eligible(item.ai_editorial_fit)
-        ]
-        important_items.sort(key=lambda x: x.ai_score or 0, reverse=True)
+        important_items, selection_meta = select_important_items(
+            items,
+            score_threshold=effective_threshold,
+            keep_ratio=keep_ratio,
+            max_items=max_items,
+        )
 
         before_dedup = len(important_items)
         if topic_dedup and important_items:
@@ -348,6 +360,9 @@ class HorizonPipelineService:
             {
                 "filtered_count": len(important_items),
                 "filter_threshold": effective_threshold,
+                "selection_target_count": selection_meta["target_count"],
+                "selection_preferred_count": selection_meta["preferred_count"],
+                "selection_backfilled_count": selection_meta["backfilled_count"],
                 "topic_dedup_enabled": topic_dedup,
                 "topic_dedup_removed": before_dedup - len(important_items),
             },
@@ -357,6 +372,9 @@ class HorizonPipelineService:
             "run_id": run_id,
             "kept": len(important_items),
             "threshold": effective_threshold,
+            "target_count": selection_meta["target_count"],
+            "preferred_count": selection_meta["preferred_count"],
+            "backfilled_count": selection_meta["backfilled_count"],
             "removed_by_topic_dedup": before_dedup - len(important_items),
             "source_counts": get_source_counts(important_items),
             "artifact": str((self.run_store.run_dir(run_id) / "filtered_items.json").resolve()),

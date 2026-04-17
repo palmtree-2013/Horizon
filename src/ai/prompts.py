@@ -5,6 +5,8 @@ TOPIC_DEDUP_SYSTEM = """You are a news topic-grouping assistant. Identify groups
 Rules:
 - Group items when they describe the same developing story, policy track, negotiation, escalation cycle, corporate case, or tightly connected set of developments
 - Use titles, tags, and summaries together; overlapping tags are strong evidence when the underlying topic is clearly shared
+- Group near-duplicate outlet rewrites of the same institutional announcement or same concrete event even when wording differs slightly
+- Group same-event rewrites such as "restore ties" vs "restore relations" or "deadliest attack" vs "deadly strikes" when the actor, action, and target clearly match
 - It is acceptable to group follow-up coverage from different outlets if a reader would expect them in one digest item
 - Only group items when there is a clear shared triggering event, decision, negotiation track, or confrontation episode
 - Group outcome + consequence coverage together when they stem from the same core event
@@ -16,6 +18,7 @@ Rules:
 - Do NOT group items that only share "Ukraine", "China", "Iran", "EU", or another broad actor if the specific event, decision, or policy track is different
 - Do NOT group items that only share a politician, public figure, or ideological theme (for example multiple unrelated Trump stories)
 - Do NOT group two stories just because the same leader commented on them on the same day; separate ceasefire coverage and Iran-talks scheduling are different topics
+- Do NOT group items when the action materially differs, such as impose vs lift, approve vs block, arrest vs release, or plan vs execute
 - Do NOT group opinion, cultural, or religious commentary with a separate diplomatic or policy dispute unless both pieces are explicitly about the same triggering event
 - Err on the side of keeping items separate when unsure"""
 
@@ -29,6 +32,7 @@ Examples of items that SHOULD usually be grouped:
 - election result + analysis of what the result means + likely stance of the incoming government
 - announcement of talks + article on boycott/obstacles/conditions affecting those same talks
 - sanctions decision + market/policy reaction to that same sanctions decision
+- two outlet rewrites of the same institutional announcement with slightly different verbs or nouns
 
 Examples of items that should usually stay separate:
 - two different policy moves by the same country on the same day
@@ -36,6 +40,7 @@ Examples of items that should usually stay separate:
 - broad thematic analysis and a separate breaking-news event that only share geography
 - two unrelated stories that both involve Trump, the pope, or another prominent public figure
 - a ceasefire announcement and a separate item about scheduling Iran talks, even if both quote Trump
+- two stories about the same actor and country where the action differs in a meaningful way
 
 Respond with valid JSON only:
 {{
@@ -44,62 +49,45 @@ Respond with valid JSON only:
 
 If there are no duplicates at all, return: {{"duplicates": []}}"""
 
-CONTENT_ANALYSIS_SYSTEM = """You are an expert geoeconomic editor helping filter important international affairs reporting and analysis.
+CONTENT_ANALYSIS_SYSTEM = """You are an expert geoeconomic editor selecting stories for a geoeconomic briefing, not a general world-news digest.
 
-Your primary editorial focus is geoeconomics: global economics, trade, sanctions, industrial policy, export controls, energy security, strategic supply chains, sovereign finance, technology competition, economic statecraft, and cross-border policy decisions with international consequences.
+Your primary editorial focus is geoeconomics: trade, tariffs, sanctions, export controls, industrial policy, sovereign finance, currencies, banking stress, technology competition, energy security, shipping chokepoints, strategic supply chains, investment screening, critical minerals, and economic statecraft.
 
-Score content on a 0-10 scale based on importance and relevance:
+First assign an `editorial_fit` label:
+- `geoeconomic-core`: the story is primarily about an international economic, trade, financial, industrial-policy, energy, or technology-competition development
+- `geoeconomic-linked`: the story is primarily diplomatic, military, or security-related but includes a concrete and material cross-border economic mechanism or consequence explicitly present in the story
+- `broad-geopolitics`: the story is important foreign-affairs or security news but lacks a clear geoeconomic mechanism
+- `off-topic`: domestic, humanitarian, crime, protest, court, culture, migration, or other stories outside the briefing focus
 
-**9-10: Critical** - Major geopolitical developments with immediate strategic or global significance
-- Major military escalation or de-escalation
-- High-impact diplomatic breakthroughs or breakdowns
-- Major sanctions, export-control, tariff, trade, currency, industrial-policy, or energy-policy moves with broad international consequences
-- Leadership changes or state actions likely to reshape regional security
+Scoring rules:
+- `9-10`: reserved for major `geoeconomic-core` or `geoeconomic-linked` developments with clear international spillover
+- `7-8`: reserved for solid `geoeconomic-core` or `geoeconomic-linked` stories worth including in the briefing
+- `broad-geopolitics` MUST NOT score above 6
+- `off-topic` MUST NOT score above 2
 
-**7-8: High Value** - Important developments worth immediate attention
-- Important negotiations, sanctions developments, industrial-policy moves, trade and energy decisions, sovereign finance developments, or policy decisions with international economic consequences
-- High-quality regional analysis with strong sourcing
-- Meaningful developments in security, trade, energy, technology competition, or diplomacy
-
-**5-6: Interesting** - Worth knowing but not urgent
-- Useful background analysis, follow-up reporting, or secondary developments in geopolitics or geoeconomics
-- Regionally important stories with limited wider spillover
-- Moderate community or analyst interest
-
-**3-4: Low Priority** - Generic or routine content
-- Repetitive coverage without new information
-- Thin commentary or low-substance aggregation
-- Minor updates with limited strategic or economic importance
-
-**0-2: Noise** - Not relevant or low quality
-- Rumor, propaganda, or weakly sourced claims
-- Off-topic content
-- Trivial updates with no analytical value
+Use `geoeconomic-linked` sparingly. Only use it when the article itself contains a specific mechanism such as sanctions, shipping disruption, energy supply risk, trade restrictions, industrial policy, sovereign-finance stress, investment controls, or another explicit cross-border economic channel. Do not infer an economic angle from general instability alone.
 
 Strongly down-rank or exclude:
-- human-rights, immigration, crime, disaster, protest, court, or social-affairs stories that are primarily humanitarian or domestic in nature
-- general human-interest stories about individual suffering or detention
-
-Only score such stories highly if they are directly tied to:
-- sanctions or sanctions evasion
-- trade restrictions, tariffs, export controls, or investment screening
-- industrial policy, technology controls, or strategic supply chains
-- energy security, shipping chokepoints, or commodity disruptions
-- sovereign debt, currency, reserve, banking, or major macro-financial stress with cross-border impact
-- state coercion, retaliation, or bargaining that materially affects international economic relations
+- human-rights, immigration, crime, disaster, protest, court, religious-policy, or social-affairs stories that are primarily humanitarian or domestic in nature
+- arrests, detentions, court cases, political crackdowns, and military incidents that do not have an explicit economic-statecraft or cross-border market mechanism
+- opinion or narrative-war pieces unless they directly explain a material geoeconomic policy or market consequence
+- generic market commentary, investor notes, newsletter-style takes, and macro columns without a concrete state, policy, regulatory, sanctions, trade, or cross-border strategic mechanism
+- private-sector corporate deals or company news unless they involve strategic sectors, state policy, antitrust, investment screening, export controls, sovereign actors, or systemic cross-border financial risk
 
 Consider:
-- Strategic significance
+- Specificity of the economic or statecraft mechanism
 - Potential regional or global spillover
 - Policy, diplomatic, economic, financial, trade, industrial, energy, or military impact
 - Credibility and seriousness of the sourcing
 - Quality of writing/presentation
-- Relevance to geopolitics, geoeconomics, foreign policy, international security, trade, sanctions, industrial policy, and statecraft
+- Whether the story fits a geoeconomic briefing rather than a general foreign-affairs digest
+- Whether the article contains a concrete development instead of a generic market take or thematic essay
 - Community discussion quality: substantive comments, competing interpretations, and factual corrections increase value
 - Engagement signals: high upvotes/favorites with substantive discussion indicate community-validated importance
 """
 
 CONTENT_ANALYSIS_USER = """Analyze the following content and provide a JSON response with:
+- editorial_fit: one of geoeconomic-core, geoeconomic-linked, broad-geopolitics, off-topic
 - score (0-10): Importance score
 - reason: Brief explanation for the score (mention discussion quality if comments are provided)
 - summary: One-sentence summary of the content
@@ -108,6 +96,7 @@ CONTENT_ANALYSIS_USER = """Analyze the following content and provide a JSON resp
 Content:
 Title: {title}
 Source: {source}
+Source Context: {source_context}
 Author: {author}
 URL: {url}
 {content_section}
@@ -115,6 +104,7 @@ URL: {url}
 
 Respond with valid JSON only:
 {{
+  "editorial_fit": "<label>",
   "score": <number>,
   "reason": "<explanation>",
   "summary": "<one-sentence-summary>",

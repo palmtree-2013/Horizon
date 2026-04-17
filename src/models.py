@@ -30,6 +30,7 @@ class ContentItem(BaseModel):
 
     # AI analysis results
     ai_score: Optional[float] = None  # 0-10 importance score
+    ai_editorial_fit: Optional[str] = None
     ai_reason: Optional[str] = None
     ai_summary: Optional[str] = None
     ai_tags: List[str] = Field(default_factory=list)

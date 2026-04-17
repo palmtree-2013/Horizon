@@ -1,14 +1,18 @@
 """Content analysis using AI."""
 
-import json
-import re
 from typing import List, Optional
 from tenacity import retry, stop_after_attempt, wait_exponential
 from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, MofNCompleteColumn
 
 from .client import AIClient
 from .prompts import CONTENT_ANALYSIS_SYSTEM, CONTENT_ANALYSIS_USER
-from .utils import parse_json_response
+from .utils import (
+    EDITORIAL_FIT_BROAD,
+    EDITORIAL_FIT_OFF_TOPIC,
+    clamp_score_for_editorial_fit,
+    normalize_editorial_fit,
+    parse_json_response,
+)
 from ..models import ContentItem
 
 
@@ -51,6 +55,7 @@ class ContentAnalyzer:
                     except Exception as e:
                         print(f"Error analyzing item {item.id}: {e}")
                         item.ai_score = 0.0
+                        item.ai_editorial_fit = EDITORIAL_FIT_OFF_TOPIC
                         item.ai_reason = "Analysis failed"
                         item.ai_summary = item.title
                         analyzed_items.append(item)
@@ -111,11 +116,13 @@ class ContentAnalyzer:
             discussion_parts.append(f"Community Note: {meta['community_note']}")
 
         discussion_section = "\n".join(discussion_parts) if discussion_parts else ""
+        source_context = self._build_source_context(item)
 
         # Generate user prompt
         user_prompt = CONTENT_ANALYSIS_USER.format(
             title=item.title,
             source=f"{item.source_type.value}",
+            source_context=source_context,
             author=item.author or "Unknown",
             url=str(item.url),
             content_section=content_section,
@@ -126,7 +133,7 @@ class ContentAnalyzer:
         response = await self.client.complete(
             system=CONTENT_ANALYSIS_SYSTEM,
             user=user_prompt,
-            temperature=0.3
+            temperature=0.0
         )
 
         # Parse JSON response with robust fallback
@@ -134,13 +141,139 @@ class ContentAnalyzer:
         if result is None:
             print(f"Warning: could not parse analysis response for {item.id}, using defaults")
             item.ai_score = 0.0
+            item.ai_editorial_fit = EDITORIAL_FIT_OFF_TOPIC
             item.ai_reason = "Analysis response parse failed"
             item.ai_summary = item.title
             item.ai_tags = []
             return
 
         # Update item with analysis results
-        item.ai_score = float(result.get("score", 0))
+        raw_score = float(result.get("score", 0) or 0)
+        editorial_fit = normalize_editorial_fit(result.get("editorial_fit"))
+        if editorial_fit is None:
+            editorial_fit = EDITORIAL_FIT_BROAD if raw_score > 0 else EDITORIAL_FIT_OFF_TOPIC
+        editorial_fit = self._apply_editorial_guardrails(
+            item=item,
+            editorial_fit=editorial_fit,
+            summary=result.get("summary", item.title),
+            reason=result.get("reason", ""),
+            tags=result.get("tags", []),
+        )
+        item.ai_editorial_fit = editorial_fit
+        item.ai_score = clamp_score_for_editorial_fit(raw_score, editorial_fit)
         item.ai_reason = result.get("reason", "")
         item.ai_summary = result.get("summary", item.title)
         item.ai_tags = result.get("tags", [])
+
+    @staticmethod
+    def _build_source_context(item: ContentItem) -> str:
+        """Build concise source metadata for the analysis prompt."""
+        meta = item.metadata
+        parts = []
+        if meta.get("feed_name"):
+            parts.append(f"feed: {meta['feed_name']}")
+        if meta.get("category"):
+            parts.append(f"category: {meta['category']}")
+        if meta.get("tags"):
+            tags = ", ".join(str(tag) for tag in meta["tags"][:6] if tag)
+            if tags:
+                parts.append(f"entry tags: {tags}")
+        if meta.get("merged_sources"):
+            merged = ", ".join(str(source) for source in meta["merged_sources"])
+            if merged:
+                parts.append(f"merged sources: {merged}")
+        return "; ".join(parts) if parts else "none"
+
+    @staticmethod
+    def _apply_editorial_guardrails(
+        item: ContentItem,
+        editorial_fit: str,
+        summary: str,
+        reason: str,
+        tags: list[str],
+    ) -> str:
+        """Apply deterministic exclusions for recurring non-briefing patterns."""
+        combined = " ".join(
+            part
+            for part in [
+                item.title,
+                summary,
+                reason,
+                " ".join(tags),
+                item.content or "",
+            ]
+            if part
+        ).casefold()
+
+        public_interest_markers = [
+            "antitrust",
+            "banking",
+            "central bank",
+            "competition",
+            "critical mineral",
+            "currency",
+            "debt",
+            "derivatives",
+            "energy",
+            "export control",
+            "financial stability",
+            "imf",
+            "industrial policy",
+            "investment screening",
+            "oil",
+            "private credit",
+            "regulator",
+            "sanction",
+            "shipping",
+            "sovereign",
+            "state",
+            "strait of hormuz",
+            "supply chain",
+            "tariff",
+            "trade",
+            "world bank",
+        ]
+        hard_policy_markers = [
+            "central bank",
+            "competition chief",
+            "critical mineral",
+            "energy",
+            "export control",
+            "financial stability",
+            "imf",
+            "industrial policy",
+            "investment screening",
+            "merger rules",
+            "national security",
+            "regulation",
+            "regulator",
+            "rules",
+            "sanction",
+            "shipping",
+            "sovereign",
+            "state",
+            "strait of hormuz",
+            "supply chain",
+            "systemic risk",
+            "tariff",
+            "trade",
+            "world bank",
+        ]
+        corporate_deal_markers = [
+            "acquisition",
+            "deal",
+            "m&a",
+            "merger",
+            "stake",
+            "takeover",
+        ]
+
+        has_public_interest = any(marker in combined for marker in public_interest_markers)
+        has_hard_policy_marker = any(marker in combined for marker in hard_policy_markers)
+        has_corporate_deal = any(marker in combined for marker in corporate_deal_markers)
+
+        if item.title.strip().endswith("?") and not has_public_interest:
+            return EDITORIAL_FIT_OFF_TOPIC
+        if has_corporate_deal and not has_hard_policy_marker:
+            return EDITORIAL_FIT_OFF_TOPIC
+        return editorial_fit

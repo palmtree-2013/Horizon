@@ -3,6 +3,7 @@
 import asyncio
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
+from difflib import SequenceMatcher
 import re
 from typing import List, Dict, Any
 from urllib.parse import urlparse
@@ -22,6 +23,7 @@ from .ai.analyzer import ContentAnalyzer
 from .ai.summarizer import DailySummarizer
 from .ai.enricher import ContentEnricher
 from .ai.tokens import get_usage_snapshot
+from .ai.utils import is_editorially_eligible
 
 
 class HorizonOrchestrator:
@@ -90,12 +92,12 @@ class HorizonOrchestrator:
             threshold = self.config.filtering.ai_score_threshold
             important_items = [
                 item for item in analyzed_items
-                if item.ai_score and item.ai_score >= threshold
+                if item.ai_score and item.ai_score >= threshold and is_editorially_eligible(item.ai_editorial_fit)
             ]
             important_items.sort(key=lambda x: x.ai_score or 0, reverse=True)
 
             self.console.print(
-                f"⭐️ {len(important_items)} items scored ≥ {threshold}\n"
+                f"⭐️ {len(important_items)} items scored ≥ {threshold} and matched the editorial fit\n"
             )
 
             # 5.5 Semantic deduplication: drop items covering the same topic
@@ -305,6 +307,131 @@ class HorizonOrchestrator:
         normalized = re.sub(r"[^\w]+", " ", title.casefold())
         return re.sub(r"\s+", " ", normalized).strip()
 
+    @classmethod
+    def _canonical_title_tokens(cls, title: str) -> list[str]:
+        """Normalize title tokens for conservative near-duplicate checks."""
+        token_map = {
+            "announced": "announce",
+            "announces": "announce",
+            "attack": "strike",
+            "attacks": "strike",
+            "deal": "agreement",
+            "deals": "agreement",
+            "relations": "relations",
+            "restores": "restore",
+            "restoring": "restore",
+            "strikes": "strike",
+            "talks": "talk",
+            "tie": "relations",
+            "ties": "relations",
+        }
+        stop_words = {
+            "a",
+            "an",
+            "and",
+            "as",
+            "at",
+            "for",
+            "from",
+            "in",
+            "into",
+            "of",
+            "on",
+            "or",
+            "the",
+            "to",
+            "with",
+        }
+
+        tokens = []
+        for token in cls._normalize_title(title).split():
+            token = token_map.get(token, token)
+            if token in stop_words:
+                continue
+            if len(token) <= 2 and token not in {"eu", "imf", "uk", "us"}:
+                continue
+            tokens.append(token)
+        return tokens
+
+    @classmethod
+    def _is_near_duplicate_title(cls, first: str, second: str) -> bool:
+        """Return True for conservative outlet rewrites of the same title."""
+        normalized_first = cls._normalize_title(first)
+        normalized_second = cls._normalize_title(second)
+        if not normalized_first or not normalized_second:
+            return False
+        if normalized_first == normalized_second:
+            return True
+
+        first_tokens = cls._canonical_title_tokens(first)
+        second_tokens = cls._canonical_title_tokens(second)
+        if not first_tokens or not second_tokens:
+            return False
+
+        shared = set(first_tokens) & set(second_tokens)
+        overlap = len(shared) / min(len(set(first_tokens)), len(set(second_tokens)))
+        if overlap < 0.8:
+            return False
+
+        ratio = SequenceMatcher(None, " ".join(first_tokens), " ".join(second_tokens)).ratio()
+        return ratio >= 0.86
+
+    @classmethod
+    def _normalized_text_token_set(cls, text: str | None) -> set[str]:
+        """Normalize free text into a conservative token set."""
+        return set(cls._canonical_title_tokens(text or ""))
+
+    @classmethod
+    def _overlap_ratio(cls, first: set[str], second: set[str]) -> float:
+        """Return overlap ratio relative to the shorter input."""
+        if not first or not second:
+            return 0.0
+        return len(first & second) / min(len(first), len(second))
+
+    @classmethod
+    def _has_conflicting_title_actions(cls, first: str, second: str) -> bool:
+        """Block obviously contradictory action pairs from being merged."""
+        first_tokens = set(cls._normalize_title(first).split())
+        second_tokens = set(cls._normalize_title(second).split())
+        conflicting_pairs = [
+            ({"approve", "approves", "approved"}, {"block", "blocks", "blocked"}),
+            ({"arrest", "arrests", "arrested"}, {"release", "releases", "released"}),
+            ({"expand", "expands", "expanded", "raise", "raises", "raised"}, {"cut", "cuts", "cutting", "lower", "lowers", "lowered"}),
+            ({"impose", "imposes", "imposed"}, {"ease", "eases", "eased", "lift", "lifts", "lifted", "remove", "removes", "removed"}),
+            ({"restore", "restores", "restored"}, {"freeze", "freezes", "frozen", "suspend", "suspends", "suspended"}),
+        ]
+        return any(
+            (left & first_tokens and right & second_tokens)
+            or (left & second_tokens and right & first_tokens)
+            for left, right in conflicting_pairs
+        )
+
+    @classmethod
+    def _has_topic_group_support(cls, primary: ContentItem, duplicate: ContentItem) -> bool:
+        """Require local evidence before accepting an AI semantic merge."""
+        if cls._has_conflicting_title_actions(primary.title, duplicate.title):
+            return False
+        if cls._is_near_duplicate_title(primary.title, duplicate.title):
+            return True
+
+        primary_title = cls._normalized_text_token_set(primary.title)
+        duplicate_title = cls._normalized_text_token_set(duplicate.title)
+        shared_title = primary_title & duplicate_title
+
+        primary_tags = cls._normalized_text_token_set(" ".join(primary.ai_tags))
+        duplicate_tags = cls._normalized_text_token_set(" ".join(duplicate.ai_tags))
+        shared_tags = primary_tags & duplicate_tags
+
+        primary_summary = cls._normalized_text_token_set(primary.ai_summary)
+        duplicate_summary = cls._normalized_text_token_set(duplicate.ai_summary)
+        summary_overlap = cls._overlap_ratio(primary_summary, duplicate_summary)
+
+        if len(shared_tags) >= 2 and (len(shared_title) >= 1 or summary_overlap >= 0.4):
+            return True
+        if len(shared_title) >= 2 and summary_overlap >= 0.4:
+            return True
+        return False
+
     def merge_cross_source_duplicates(self, items: List[ContentItem]) -> List[ContentItem]:
         """Merge items that point to the same URL from different sources.
 
@@ -450,6 +577,8 @@ class HorizonOrchestrator:
             lines.append(f"[{i}] {item.title}\n    Tags: {tags}\n    Summary: {summary}")
         items_text = "\n\n".join(lines)
 
+        heuristic_groups = self._heuristic_topic_duplicate_groups(items)
+
         try:
             ai_client = create_ai_client(self.config.ai)
             response = await ai_client.complete(
@@ -460,12 +589,18 @@ class HorizonOrchestrator:
             result = parse_json_response(response)
             if result is None:
                 self.console.print("[yellow]  dedup: could not parse AI response, skipping[/yellow]")
-                return items
-
-            duplicate_groups = result.get("duplicates", [])
+                duplicate_groups = []
+            else:
+                duplicate_groups = result.get("duplicates", [])
         except Exception as e:
             self.console.print(f"[yellow]  dedup: AI call failed ({e}), skipping[/yellow]")
-            return items
+            duplicate_groups = []
+
+        duplicate_groups = self._validated_ai_duplicate_groups(items, duplicate_groups)
+        duplicate_groups = self._combine_duplicate_groups(
+            item_count=len(items),
+            groups=[*heuristic_groups, *duplicate_groups],
+        )
 
         if not duplicate_groups:
             return items
@@ -545,6 +680,84 @@ class HorizonOrchestrator:
             )
 
         return [item for i, item in enumerate(items) if i not in drop_indices]
+
+    def _heuristic_topic_duplicate_groups(self, items: List[ContentItem]) -> list[list[int]]:
+        """Catch near-identical outlet rewrites before relying on AI grouping."""
+        groups: list[list[int]] = []
+        used: set[int] = set()
+
+        for idx, item in enumerate(items):
+            if idx in used:
+                continue
+            group = [idx]
+            for other_idx in range(idx + 1, len(items)):
+                if other_idx in used:
+                    continue
+                if self._is_near_duplicate_title(item.title, items[other_idx].title):
+                    group.append(other_idx)
+            if len(group) > 1:
+                groups.append(group)
+                used.update(group[1:])
+
+        return groups
+
+    def _validated_ai_duplicate_groups(self, items: List[ContentItem], groups: list[Any]) -> list[list[int]]:
+        """Reject AI duplicate groups that lack local support."""
+        validated: list[list[int]] = []
+
+        for group in groups:
+            if not isinstance(group, list) or len(group) < 2:
+                continue
+            primary_idx = group[0]
+            if not isinstance(primary_idx, int) or primary_idx < 0 or primary_idx >= len(items):
+                continue
+
+            primary = items[primary_idx]
+            accepted = [primary_idx]
+            for dup_idx in group[1:]:
+                if not isinstance(dup_idx, int) or dup_idx < 0 or dup_idx >= len(items):
+                    continue
+                if dup_idx == primary_idx:
+                    continue
+                if self._has_topic_group_support(primary, items[dup_idx]):
+                    accepted.append(dup_idx)
+            if len(accepted) > 1:
+                validated.append(accepted)
+
+        return validated
+
+    @staticmethod
+    def _combine_duplicate_groups(item_count: int, groups: list[Any]) -> list[list[int]]:
+        """Merge overlapping heuristic and AI duplicate groups."""
+        adjacency: dict[int, set[int]] = {idx: set() for idx in range(item_count)}
+
+        for group in groups:
+            if not isinstance(group, list):
+                continue
+            valid = sorted({idx for idx in group if isinstance(idx, int) and 0 <= idx < item_count})
+            if len(valid) < 2:
+                continue
+            for idx in valid:
+                adjacency[idx].update(valid)
+
+        combined: list[list[int]] = []
+        visited: set[int] = set()
+        for idx in range(item_count):
+            if idx in visited or len(adjacency[idx]) < 2:
+                continue
+            stack = [idx]
+            component: set[int] = set()
+            while stack:
+                current = stack.pop()
+                if current in component:
+                    continue
+                component.add(current)
+                stack.extend(adjacency[current] - component)
+            visited.update(component)
+            if len(component) > 1:
+                combined.append(sorted(component))
+
+        return combined
 
     async def _enrich_important_items(self, items: List[ContentItem], include_background: bool = False) -> None:
         """Enrich items with background knowledge (2nd AI pass).

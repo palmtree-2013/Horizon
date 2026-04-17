@@ -10,7 +10,19 @@ from src.mcp.server import hz_get_metrics
 from src.mcp.service import HorizonPipelineService
 
 
-def make_item(item_id: str, score: float | None = None) -> ContentItem:
+def load_test_config_text(repo_root: Path) -> str:
+    for candidate in ("config.example.json", "config.json"):
+        path = repo_root / "data" / candidate
+        if path.exists():
+            return path.read_text(encoding="utf-8")
+    raise FileNotFoundError("No test config fixture found in data/")
+
+
+def make_item(
+    item_id: str,
+    score: float | None = None,
+    editorial_fit: str | None = None,
+) -> ContentItem:
     item = ContentItem(
         id=item_id,
         source_type=SourceType.RSS,
@@ -21,16 +33,14 @@ def make_item(item_id: str, score: float | None = None) -> ContentItem:
         published_at=datetime.now(timezone.utc),
     )
     item.ai_score = score
+    item.ai_editorial_fit = editorial_fit
     return item
 
 
 def test_validate_config_smoke(tmp_path: Path) -> None:
     repo_root = Path(__file__).resolve().parents[1]
     config_path = tmp_path / "config.json"
-    config_path.write_text(
-        (repo_root / "data" / "config.example.json").read_text(encoding="utf-8"),
-        encoding="utf-8",
-    )
+    config_path.write_text(load_test_config_text(repo_root), encoding="utf-8")
 
     service = HorizonPipelineService(runs_root=tmp_path / "mcp-runs")
     result = asyncio.run(
@@ -49,10 +59,7 @@ def test_validate_config_smoke(tmp_path: Path) -> None:
 def test_get_effective_config_can_filter_sources(tmp_path: Path) -> None:
     repo_root = Path(__file__).resolve().parents[1]
     config_path = tmp_path / "config.json"
-    config_path.write_text(
-        (repo_root / "data" / "config.example.json").read_text(encoding="utf-8"),
-        encoding="utf-8",
-    )
+    config_path.write_text(load_test_config_text(repo_root), encoding="utf-8")
 
     service = HorizonPipelineService(runs_root=tmp_path / "mcp-runs")
     result = service.get_effective_config(
@@ -144,6 +151,32 @@ def test_filter_items_uses_public_topic_dedup_api(tmp_path: Path, monkeypatch) -
     assert result["kept"] == 1
     assert result["removed_by_topic_dedup"] == 1
     assert service.run_store.load_items("run-topic-dedup", "filtered")[0]["id"] == "item-1"
+
+
+def test_filter_items_requires_editorial_fit(tmp_path: Path, monkeypatch) -> None:
+    service = HorizonPipelineService(runs_root=tmp_path / "mcp-runs")
+    service.run_store.create_run("run-editorial-fit")
+
+    monkeypatch.setattr(
+        service,
+        "_load_stage_items",
+        lambda **kwargs: (
+            [
+                make_item("item-1", score=9.0, editorial_fit="geoeconomic-core"),
+                make_item("item-2", score=9.0, editorial_fit="broad-geopolitics"),
+            ],
+            SimpleNamespace(
+                runtime=SimpleNamespace(),
+                config_path=tmp_path / "config.json",
+                config=SimpleNamespace(filtering=SimpleNamespace(ai_score_threshold=7.0)),
+            ),
+        ),
+    )
+
+    result = asyncio.run(service.filter_items(run_id="run-editorial-fit", topic_dedup=False))
+
+    assert result["kept"] == 1
+    assert service.run_store.load_items("run-editorial-fit", "filtered")[0]["id"] == "item-1"
 
 
 def test_score_items_uses_public_pre_score_dedup_api(tmp_path: Path, monkeypatch) -> None:

@@ -28,6 +28,7 @@ def make_item(
         published_at=datetime.now(timezone.utc),
     )
     item.ai_score = score
+    item.ai_editorial_fit = "geoeconomic-core"
     item.ai_summary = summary
     item.ai_tags = tags
     return item
@@ -83,6 +84,103 @@ def test_merge_topic_duplicates_groups_closely_related_items(monkeypatch) -> Non
         {"url": "https://example.com/hormuz-2", "title": related.title},
     ]
     assert item.metadata["sources"] == item.metadata["cluster_references"]
+
+
+def test_merge_topic_duplicates_catches_near_duplicate_outlet_rewrites(monkeypatch) -> None:
+    class FakeClient:
+        async def complete(self, system, user, temperature):  # type: ignore[no-untyped-def]
+            return '{"duplicates": []}'
+
+    monkeypatch.setattr("src.orchestrator.create_ai_client", lambda config: FakeClient())
+
+    orchestrator = HorizonOrchestrator(SimpleNamespace(ai=SimpleNamespace(), email=None), SimpleNamespace())
+    primary = make_item(
+        "item-1",
+        "IMF, World Bank restore relations with Venezuela",
+        "https://example.com/venezuela-1",
+        8.0,
+        "The institutions resume ties with Venezuela.",
+        ["IMF", "World Bank", "Venezuela"],
+        "Primary content",
+    )
+    related = make_item(
+        "item-2",
+        "IMF, World Bank restore ties with Venezuela",
+        "https://example.com/venezuela-2",
+        7.0,
+        "A second outlet reports the same restoration of ties.",
+        ["IMF", "World Bank", "Venezuela"],
+        "Related content",
+    )
+
+    merged = asyncio.run(orchestrator.merge_topic_duplicates([primary, related]))
+
+    assert len(merged) == 1
+    assert merged[0].metadata["cluster_member_count"] == 2
+
+
+def test_merge_topic_duplicates_keeps_conflicting_actions_separate(monkeypatch) -> None:
+    class FakeClient:
+        async def complete(self, system, user, temperature):  # type: ignore[no-untyped-def]
+            return '{"duplicates": []}'
+
+    monkeypatch.setattr("src.orchestrator.create_ai_client", lambda config: FakeClient())
+
+    orchestrator = HorizonOrchestrator(SimpleNamespace(ai=SimpleNamespace(), email=None), SimpleNamespace())
+    first = make_item(
+        "item-1",
+        "EU imposes new sanctions on Venezuela banks",
+        "https://example.com/sanctions-impose",
+        8.0,
+        "The EU imposes a new sanctions package.",
+        ["EU", "sanctions", "Venezuela"],
+        "First content",
+    )
+    second = make_item(
+        "item-2",
+        "EU lifts sanctions on Venezuela banks",
+        "https://example.com/sanctions-lift",
+        8.0,
+        "The EU removes the sanctions package.",
+        ["EU", "sanctions", "Venezuela"],
+        "Second content",
+    )
+
+    merged = asyncio.run(orchestrator.merge_topic_duplicates([first, second]))
+
+    assert len(merged) == 2
+
+
+def test_merge_topic_duplicates_rejects_unsupported_ai_group(monkeypatch) -> None:
+    class FakeClient:
+        async def complete(self, system, user, temperature):  # type: ignore[no-untyped-def]
+            return '{"duplicates": [[0, 1]]}'
+
+    monkeypatch.setattr("src.orchestrator.create_ai_client", lambda config: FakeClient())
+
+    orchestrator = HorizonOrchestrator(SimpleNamespace(ai=SimpleNamespace(), email=None), SimpleNamespace())
+    first = make_item(
+        "item-1",
+        "IMF, World Bank restore relations with Venezuela",
+        "https://example.com/imf-venezuela",
+        8.0,
+        "The IMF and World Bank restore relations with Venezuela.",
+        ["IMF", "World Bank", "Venezuela"],
+        "First content",
+    )
+    second = make_item(
+        "item-2",
+        "Why Coutts is making an unexpected play for video games",
+        "https://example.com/coutts-games",
+        8.0,
+        "A bank explores a consumer gaming opportunity.",
+        ["banking", "gaming", "consumer"],
+        "Second content",
+    )
+
+    merged = asyncio.run(orchestrator.merge_topic_duplicates([first, second]))
+
+    assert len(merged) == 2
 
 
 def test_merge_pre_score_duplicates_merges_same_title_across_feeds() -> None:

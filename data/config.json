@@ -2,7 +2,7 @@
   "version": "1.0",
   "ai": {
     "provider": "openai",
-    "model": "openrouter/elephant-alpha",
+    "model": "moonshotai/kimi-k2.5",
     "base_url": "https://openrouter.ai/api/v1",
     "api_key_env": "OPENROUTER_API_KEY",
     "languages": ["zh", "en"]

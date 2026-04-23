@@ -2,7 +2,7 @@
   "version": "1.0",
   "ai": {
     "provider": "openai",
-    "model": "google/gemma-4-26b-a4b-it:free",
+    "model": "tencent/hy3-preview:free",
     "base_url": "https://openrouter.ai/api/v1",
     "api_key_env": "OPENROUTER_API_KEY",
     "languages": ["zh", "en"]

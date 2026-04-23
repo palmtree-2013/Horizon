@@ -2,7 +2,7 @@
   "version": "1.0",
   "ai": {
     "provider": "openai",
-    "model": "openrouter/elephant-alpha",
+    "model": "google/gemma-4-26b-a4b-it:free",
     "base_url": "https://openrouter.ai/api/v1",
     "api_key_env": "OPENROUTER_API_KEY",
     "languages": ["zh", "en"]
@@ -30,19 +30,19 @@
       {
         "name": "The Diplomat",
         "url": "https://thediplomat.com/feed/",
-        "enabled": true,
+        "enabled": false,
         "category": "indo-pacific"
       },
       {
         "name": "Nikkei Asia",
         "url": "https://asia.nikkei.com/rss/feed/nar",
-        "enabled": true,
+        "enabled": false,
         "category": "asia-economy"
       },
       {
         "name": "International Crisis Group",
         "url": "https://www.crisisgroup.org/rss",
-        "enabled": true,
+        "enabled": false,
         "category": "conflict-tracker"
       },
       {
@@ -54,7 +54,7 @@
       {
         "name": "Al Jazeera English",
         "url": "https://www.aljazeera.com/xml/rss/all.xml",
-        "enabled": true,
+        "enabled": false,
         "category": "world-news"
       }
     ],

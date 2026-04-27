@@ -113,3 +113,98 @@ def test_analyzer_downgrades_private_sector_deal_without_public_interest() -> No
 
     assert analyzed[0].ai_editorial_fit == "off-topic"
     assert analyzed[0].ai_score == 2.0
+
+
+def test_analyzer_scores_multiple_items_in_one_batch_call() -> None:
+    calls: list[str] = []
+
+    class FakeClient:
+        async def complete(self, system, user, temperature):  # type: ignore[no-untyped-def]
+            calls.append(user)
+            return """
+            {
+              "items": [
+                {
+                  "id": "item-1",
+                  "editorial_fit": "geoeconomic-core",
+                  "score": 8,
+                  "reason": "A trade policy item.",
+                  "summary": "A trade policy shift matters for markets.",
+                  "tags": ["trade", "policy", "markets"]
+                },
+                {
+                  "id": "item-2",
+                  "editorial_fit": "geoeconomic-linked",
+                  "score": 7,
+                  "reason": "An energy-security item.",
+                  "summary": "An energy development affects regional supply.",
+                  "tags": ["energy", "security", "supply"]
+                }
+              ]
+            }
+            """
+
+    first = make_item()
+    second = make_item()
+    second.id = "item-2"
+    second.title = "Energy disruption threatens regional supply"
+
+    analyzed = asyncio.run(ContentAnalyzer(FakeClient()).analyze_batch([first, second], batch_size=10))
+
+    assert len(calls) == 1
+    assert "ID: item-1" in calls[0]
+    assert "ID: item-2" in calls[0]
+    assert [item.ai_score for item in analyzed] == [8.0, 7.0]
+
+
+def test_analyzer_repairs_missing_object_boundary_after_tags() -> None:
+    response = """
+    {
+      "type": "object",
+      "items": [
+        {
+          "id": "item-1",
+          "editorial_fit": "geoeconomic-linked",
+          "score": 7,
+          "reason": "Shipping risk.",
+          "summary": "Piracy threatens shipping.",
+          "tags": ["shipping", "risk"],
+          "id": "item-2",
+          "editorial_fit": "broad-geopolitics",
+          "score": 4,
+          "reason": "Mostly geopolitical.",
+          "summary": "Military spending rises.",
+          "tags": ["military", "spending"]
+        }
+      ]
+    }
+    """
+
+    parsed = ContentAnalyzer._parse_batch_response(response)
+
+    assert parsed is not None
+    assert [entry["id"] for entry in parsed] == ["item-1", "item-2"]
+
+
+def test_analyzer_extracts_complete_objects_from_truncated_batch_response() -> None:
+    response = """
+    {"items": [
+      {
+        "id": "item-1",
+        "editorial_fit": "broad-geopolitics",
+        "score": 5,
+        "reason": "Mostly geopolitical.",
+        "summary": "Military spending rises.",
+        "tags": ["military", "spending"]
+      },
+      {
+        "id": "item-2",
+        "editorial_fit": "broad-geopolitics",
+        "score": 4,
+        "reason": "Military
+    """
+
+    parsed = ContentAnalyzer._parse_batch_response(response)
+
+    assert parsed is not None
+    assert [entry["id"] for entry in parsed] == ["item-1"]

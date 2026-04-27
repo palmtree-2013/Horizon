@@ -107,10 +107,15 @@ class HorizonOrchestrator:
             )
 
             # 5.5 Semantic deduplication: drop items covering the same topic
-            deduped_items = await self.merge_topic_duplicates(important_items)
+            if getattr(self.config.filtering, "ai_topic_dedup_enabled", True):
+                deduped_items = await self.merge_topic_duplicates(important_items)
+                label = "topic"
+            else:
+                deduped_items = self.merge_topic_duplicates_heuristic(important_items)
+                label = "heuristic topic"
             if len(deduped_items) < len(important_items):
                 self.console.print(
-                    f"🧹 Removed {len(important_items) - len(deduped_items)} topic duplicates "
+                    f"🧹 Removed {len(important_items) - len(deduped_items)} {label} duplicates "
                     f"→ {len(deduped_items)} unique items\n"
                 )
             important_items = deduped_items
@@ -687,6 +692,77 @@ class HorizonOrchestrator:
 
         return [item for i, item in enumerate(items) if i not in drop_indices]
 
+    def merge_topic_duplicates_heuristic(self, items: List[ContentItem]) -> List[ContentItem]:
+        """Merge topic duplicates using local heuristics only, without an AI call."""
+        if len(items) <= 1:
+            return items
+
+        duplicate_groups = self._combine_duplicate_groups(
+            item_count=len(items),
+            groups=self._heuristic_topic_duplicate_groups(items),
+        )
+        if not duplicate_groups:
+            return items
+
+        drop_indices: set[int] = set()
+        for group in duplicate_groups:
+            primary_idx = group[0]
+            primary = items[primary_idx]
+            grouped_titles: list[str] = [primary.title]
+            grouped_summaries: list[str] = [primary.ai_summary] if primary.ai_summary else []
+            grouped_tags: list[str] = list(primary.ai_tags)
+            grouped_sources: list[dict[str, str]] = [{"url": str(primary.url), "title": primary.title}]
+            cluster_members: list[dict[str, Any]] = [
+                {
+                    "title": primary.title,
+                    "url": str(primary.url),
+                    "source_type": primary.source_type.value,
+                    "published_at": primary.published_at.isoformat(),
+                }
+            ]
+
+            for dup_idx in group[1:]:
+                dup = items[dup_idx]
+                grouped_titles.append(dup.title)
+                if dup.ai_summary and dup.ai_summary not in grouped_summaries:
+                    grouped_summaries.append(dup.ai_summary)
+                for tag in dup.ai_tags:
+                    if tag not in grouped_tags:
+                        grouped_tags.append(tag)
+                grouped_sources.append({"url": str(dup.url), "title": dup.title})
+                cluster_members.append(
+                    {
+                        "title": dup.title,
+                        "url": str(dup.url),
+                        "source_type": dup.source_type.value,
+                        "published_at": dup.published_at.isoformat(),
+                    }
+                )
+                primary.ai_score = max(primary.ai_score or 0.0, dup.ai_score or 0.0)
+                if dup.content and dup.content not in (primary.content or ""):
+                    primary.content = (primary.content or "") + f"\n\n--- From {dup.source_type.value} ---\n{dup.content}"
+                for mk, mv in dup.metadata.items():
+                    if mk not in primary.metadata or not primary.metadata[mk]:
+                        primary.metadata[mk] = mv
+                drop_indices.add(dup_idx)
+
+            primary.ai_tags = grouped_tags
+            if grouped_summaries:
+                primary.ai_summary = " ".join(grouped_summaries)
+            primary.metadata["cluster_member_count"] = len(cluster_members)
+            primary.metadata["cluster_members"] = cluster_members
+            primary.metadata["cluster_titles"] = grouped_titles
+            primary.metadata["cluster_references"] = self._merge_reference_lists(
+                primary.metadata.get("cluster_references") or [],
+                grouped_sources,
+            )
+            primary.metadata["sources"] = self._merge_reference_lists(
+                primary.metadata.get("sources") or [],
+                primary.metadata["cluster_references"],
+            )
+
+        return [item for i, item in enumerate(items) if i not in drop_indices]
+
     def _heuristic_topic_duplicate_groups(self, items: List[ContentItem]) -> list[list[int]]:
         """Catch near-identical outlet rewrites before relying on AI grouping."""
         groups: list[list[int]] = []
@@ -798,7 +874,8 @@ class HorizonOrchestrator:
         ai_client = create_ai_client(self.config.ai)
         analyzer = ContentAnalyzer(ai_client)
 
-        return await analyzer.analyze_batch(items)
+        batch_size = getattr(self.config.filtering, "ai_score_batch_size", 10)
+        return await analyzer.analyze_batch(items, batch_size=batch_size)
 
     async def _generate_summary(
         self,

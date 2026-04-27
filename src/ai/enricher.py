@@ -115,6 +115,47 @@ class ContentEnricher:
         except Exception:
             return []
 
+    @staticmethod
+    def _build_search_queries(item: ContentItem, content_text: str) -> List[str]:
+        """Build grounding search queries locally to avoid an extra LLM call."""
+        queries: list[str] = []
+
+        title = re.sub(r"\s+", " ", item.title).strip()
+        if title:
+            queries.append(title)
+
+        tags = [str(tag).strip() for tag in item.ai_tags if str(tag).strip()]
+        if tags:
+            short_tags = " ".join(tags[:4])
+            if title:
+                queries.append(f"{title} {short_tags}")
+            else:
+                queries.append(short_tags)
+
+        summary = re.sub(r"\s+", " ", item.ai_summary or "").strip()
+        if summary:
+            words = summary.split()
+            if len(words) > 14:
+                summary = " ".join(words[:14])
+            queries.append(summary)
+
+        if not queries and content_text:
+            snippet = re.sub(r"\s+", " ", content_text).strip()
+            queries.append(" ".join(snippet.split()[:12]))
+
+        deduped = []
+        seen = set()
+        for query in queries:
+            query = query[:180].strip()
+            key = query.casefold()
+            if not query or key in seen:
+                continue
+            deduped.append(query)
+            seen.add(key)
+            if len(deduped) >= 3:
+                break
+        return deduped
+
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(min=2, max=10)
@@ -141,8 +182,8 @@ class ContentEnricher:
             else:
                 content_text = item.content[:4000]
 
-        # Step 1: AI identifies concepts to explain
-        queries = await self._extract_concepts(item, content_text)
+        # Step 1: Build grounding queries locally instead of spending an LLM call.
+        queries = self._build_search_queries(item, content_text)
 
         # Step 2: Search web for each concept
         all_results = []

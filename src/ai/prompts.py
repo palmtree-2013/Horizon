@@ -111,6 +111,33 @@ Respond with valid JSON only:
   "tags": ["<tag1>", "<tag2>", ...]
 }}"""
 
+CONTENT_ANALYSIS_BATCH_USER = """Analyze the following content items and provide a JSON response with one result per item.
+
+For each item, return:
+- id: the exact item id provided
+- editorial_fit: one of geoeconomic-core, geoeconomic-linked, broad-geopolitics, off-topic
+- score (0-10): Importance score
+- reason: Brief explanation for the score (mention discussion quality if comments are provided)
+- summary: One-sentence summary of the content
+- tags: Relevant topic tags (3-5 tags)
+
+Content items:
+{items}
+
+Respond with valid JSON only:
+{{
+  "items": [
+    {{
+      "id": "<exact item id>",
+      "editorial_fit": "<label>",
+      "score": <number>,
+      "reason": "<explanation>",
+      "summary": "<one-sentence-summary>",
+      "tags": ["<tag1>", "<tag2>", ...]
+    }}
+  ]
+}}"""
+
 CONCEPT_EXTRACTION_SYSTEM = """You identify geoeconomic and international-affairs concepts in news that a reader might not know.
 Given a news item, return 1-3 search queries for concepts that need explanation.
 Focus on: treaties, organizations, sanctions regimes, export-control systems, trade agreements, shipping chokepoints, disputed regions, armed groups, commodity benchmarks, legal frameworks, financial facilities, and policy terms that are not widely known.

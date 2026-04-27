@@ -283,7 +283,13 @@ class HorizonPipelineService:
 
         ai_client = ctx.runtime.create_ai_client(ctx.config.ai)
         analyzer = ctx.runtime.ContentAnalyzer(ai_client)
-        scored_items = await analyzer.analyze_batch(pre_scored_items)
+        batch_size = getattr(ctx.config.filtering, "ai_score_batch_size", 10)
+        try:
+            scored_items = await analyzer.analyze_batch(pre_scored_items, batch_size=batch_size)
+        except TypeError as exc:
+            if "batch_size" not in str(exc):
+                raise
+            scored_items = await analyzer.analyze_batch(pre_scored_items)
 
         self.run_store.save_items(run_id, "scored", items_to_dicts(scored_items))
         score_threshold = ctx.config.filtering.ai_score_threshold
@@ -352,7 +358,10 @@ class HorizonPipelineService:
         if topic_dedup and important_items:
             storage = make_storage(ctx.runtime, ctx.config_path)
             orchestrator = make_orchestrator(ctx.runtime, ctx.config, storage)
-            important_items = await orchestrator.merge_topic_duplicates(important_items)
+            if getattr(ctx.config.filtering, "ai_topic_dedup_enabled", True):
+                important_items = await orchestrator.merge_topic_duplicates(important_items)
+            else:
+                important_items = orchestrator.merge_topic_duplicates_heuristic(important_items)
 
         self.run_store.save_items(run_id, "filtered", items_to_dicts(important_items))
         meta = self.run_store.update_meta(

@@ -155,6 +155,8 @@ class FilteringConfig(BaseModel):
     time_window_hours: int = 24
     target_keep_ratio: float = 0.2
     max_important_items: int = 20
+    ai_score_batch_size: int = 10
+    ai_topic_dedup_enabled: bool = True
 
 
 class Config(BaseModel):
